@@ -2,7 +2,7 @@
   "name": "dm-tracker",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @dm-tracker/api dev\" \"pnpm --filter @dm-tracker/web dev\"",
+    "dev": "pnpm --filter @dm-tracker/shared build && concurrently \"pnpm --filter @dm-tracker/api dev\" \"pnpm --filter @dm-tracker/web dev\"",
     "build": "pnpm --filter @dm-tracker/shared build && pnpm --filter @dm-tracker/api build && pnpm --filter @dm-tracker/web build",
     "lint": "pnpm --filter @dm-tracker/api lint && pnpm --filter @dm-tracker/web lint",
     "prisma:generate": "pnpm --filter @dm-tracker/prisma generate",
@@ -18,34 +18,12 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "-",
-      ",",
-      "@",
       "@prisma/client",
       "@prisma/engines",
-      "/",
-      "a",
-      "b",
-      "bcrypt",
-      "c",
-      "d",
-      "e",
-      "esbuild",
-      "g",
-      "i",
-      "k",
-      "l",
-      "m",
-      "msgpackr-extract",
-      "n",
-      "p",
       "prisma",
-      "r",
-      "s",
-      "t",
-      "u",
-      "x",
-      "y"
+      "bcrypt",
+      "esbuild",
+      "msgpackr-extract"
     ]
   }
 }
