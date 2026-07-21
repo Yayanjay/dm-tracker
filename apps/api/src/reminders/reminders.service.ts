@@ -89,19 +89,10 @@ export class RemindersService {
         unit: reminder.medication.unit,
       });
 
-      const footer = 'Balas "sudah" jika sudah minum, "belum" jika belum';
+      const text = `${template.title}\n\n${body}\n\nBalas "sudah" jika sudah minum, "belum" jika belum.`;
 
       try {
-        const wahaMessageId = await this.waha.sendButtons(
-          chatId,
-          template.title,
-          body,
-          footer,
-          [
-            { type: "reply", text: template.buttonLabels[0] || "Sudah minum" },
-            { type: "reply", text: template.buttonLabels[1] || "Belum" },
-          ],
-        );
+        const wahaMessageId = await this.waha.sendText(chatId, text);
 
         await this.prisma.reminder.update({
           where: { id: reminder.id },

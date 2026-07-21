@@ -115,7 +115,7 @@ export class PatientsService {
       },
     });
 
-    this.sendOptIn(patient.id, patient.name, patient.waNumber);
+    await this.sendOptIn(patient.id, patient.name, patient.waNumber);
 
     return { data: patient };
   }
@@ -153,7 +153,7 @@ export class PatientsService {
     if (patient.consentStatus === "opted_in") {
       this.sendAlreadyOptedIn(patient.name, patient.waNumber);
     } else {
-      this.sendOptIn(patient.id, patient.name, patient.waNumber);
+    await this.sendOptIn(patient.id, patient.name, patient.waNumber);
     }
 
     return { data: null };
@@ -170,10 +170,8 @@ export class PatientsService {
     const body = renderTemplate(template.body, { name });
 
     try {
-      await this.waha.sendButtons(chatId, template.title, body, "", [
-        { type: "reply", text: template.buttonLabels[0] || "Setuju" },
-        { type: "reply", text: template.buttonLabels[1] || "Nanti saja" },
-      ]);
+      const text = `${template.title}\n\n${body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
+      await this.waha.sendText(chatId, text);
 
       await this.prisma.outboundMessage.create({
         data: {

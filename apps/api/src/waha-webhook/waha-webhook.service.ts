@@ -184,10 +184,8 @@ export class WahaWebhookService {
     });
 
     if (template) {
-      await this.waha.sendButtons(chatId, template.title, template.body, "", [
-        { type: "reply", text: template.buttonLabels[0] || "Setuju" },
-        { type: "reply", text: template.buttonLabels[1] || "Nanti saja" },
-      ]);
+      const text = `${template.title}\n\n${template.body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
+      await this.waha.sendText(chatId, text);
     }
   }
 }
