@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
@@ -13,9 +13,8 @@ import { RemindersModule } from "./reminders/reminders.module";
 import { WahaWebhookModule } from "./waha-webhook/waha-webhook.module";
 import { ConsumptionModule } from "./consumption/consumption.module";
 import { HealthController } from "./health.controller";
-import { SpaFallbackMiddleware } from "./spa-fallback.middleware";
 import { ServeStaticModule } from "@nestjs/serve-static";
-import { join, resolve } from "path";
+import { join } from "path";
 
 @Module({
   imports: [
@@ -47,8 +46,4 @@ import { join, resolve } from "path";
   ],
   controllers: [HealthController],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(SpaFallbackMiddleware).forRoutes("*");
-  }
-}
+export class AppModule {}
