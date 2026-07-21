@@ -54,7 +54,6 @@ export class PatientsService {
           id: true,
           name: true,
           waNumber: true,
-          phone: true,
           dob: true,
           consentStatus: true,
           consentAt: true,
@@ -108,7 +107,6 @@ export class PatientsService {
       data: {
         name: dto.name,
         waNumber: dto.waNumber,
-        phone: dto.phone,
         dob: dto.dob ? new Date(dto.dob) : null,
         consentStatus: "pending",
         createdById: adminId,
@@ -133,7 +131,6 @@ export class PatientsService {
       where: { id },
       data: {
         ...(dto.name !== undefined && { name: dto.name }),
-        ...(dto.phone !== undefined && { phone: dto.phone }),
         ...(dto.dob !== undefined && { dob: dto.dob ? new Date(dto.dob) : undefined }),
       },
     });

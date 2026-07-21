@@ -75,7 +75,6 @@ model Patient {
   id            String        @id @default(cuid())
   name          String
   waNumber      String        @unique @map("wa_number")
-  phone         String?
   dob           DateTime?
   consentStatus ConsentStatus @default(pending) @map("consent_status")
   consentAt     DateTime?     @map("consent_at")

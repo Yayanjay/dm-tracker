@@ -8,7 +8,6 @@ interface Patient {
   id: string;
   name: string;
   waNumber: string;
-  phone?: string;
   consentStatus: string;
   _count: { medications: number };
 }
@@ -21,7 +20,7 @@ export default function PatientsPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Patient | null>(null);
-  const [form, setForm] = useState({ name: "", waNumber: "", phone: "", dob: "" });
+  const [form, setForm] = useState({ name: "", waNumber: "", dob: "" });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchPatients = async () => {
@@ -43,13 +42,13 @@ export default function PatientsPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", waNumber: "", phone: "", dob: "" });
+    setForm({ name: "", waNumber: "", dob: "" });
     setShowModal(true);
   };
 
   const openEdit = (p: Patient) => {
     setEditing(p);
-    setForm({ name: p.name, waNumber: p.waNumber, phone: p.phone || "", dob: "" });
+    setForm({ name: p.name, waNumber: p.waNumber, dob: "" });
     setShowModal(true);
   };
 
@@ -58,9 +57,9 @@ export default function PatientsPage() {
     setSubmitting(true);
     try {
       if (editing) {
-        await api.patch(`/patients/${editing.id}`, { name: form.name, phone: form.phone });
+        await api.patch(`/patients/${editing.id}`, { name: form.name });
       } else {
-        await api.post("/patients", { name: form.name, waNumber: form.waNumber, phone: form.phone || undefined });
+        await api.post("/patients", { name: form.name, waNumber: form.waNumber });
       }
       setShowModal(false);
       fetchPatients();
@@ -179,10 +178,6 @@ export default function PatientsPage() {
                   <input type="text" value={form.waNumber} onChange={(e) => setForm({ ...form, waNumber: e.target.value })} className="w-full rounded-md border px-3 py-2 text-sm" placeholder="6281234567890" required />
                 </div>
               )}
-              <div>
-                <label className="text-sm font-medium">No. Telepon (opsional)</label>
-                <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-md border px-3 py-2 text-sm" />
-              </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 rounded-md border px-4 py-2 text-sm">Batal</button>
                 <button type="submit" disabled={submitting} className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">

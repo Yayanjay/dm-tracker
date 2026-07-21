@@ -10,10 +10,6 @@ export class CreatePatientDto {
   })
   waNumber: string;
 
-  @IsString()
-  @IsOptional()
-  phone?: string;
-
   @IsDateString()
   @IsOptional()
   dob?: string;

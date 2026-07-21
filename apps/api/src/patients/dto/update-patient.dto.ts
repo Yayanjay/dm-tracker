@@ -5,10 +5,6 @@ export class UpdatePatientDto {
   @IsOptional()
   name?: string;
 
-  @IsString()
-  @IsOptional()
-  phone?: string;
-
   @IsDateString()
   @IsOptional()
   dob?: string;
