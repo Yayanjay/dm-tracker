@@ -68,6 +68,9 @@ importers:
       ioredis:
         specifier: ^5.4.0
         version: 5.11.1
+      luxon:
+        specifier: ^3.7.2
+        version: 3.7.2
       passport:
         specifier: ^0.7.0
         version: 0.7.0
@@ -93,6 +96,9 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+      '@types/luxon':
+        specifier: ^3.7.2
+        version: 3.7.2
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
@@ -1657,6 +1663,9 @@ packages:
 
   '@types/jsonwebtoken@9.0.10':
     resolution: {integrity: sha512-asx5hIG9Qmf/1oStypjanR7iKTv0gXQ1Ov/jfrX6kS/EO0OFni8orbmGCn0672NHR3kXHwpAwR+B368ZGN/2rA==}
+
+  '@types/luxon@3.7.2':
+    resolution: {integrity: sha512-gW+Oib+vUtGJBtNC8V9Reww0oIpusw+4m81uncg9REGZAJfqOQHfo/nkabnc7w0QReXyPqjrbWMJk6NuAkiX3Q==}
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
@@ -5146,6 +5155,8 @@ snapshots:
     dependencies:
       '@types/ms': 2.1.0
       '@types/node': 22.20.1
+
+  '@types/luxon@3.7.2': {}
 
   '@types/ms@2.1.0': {}
 

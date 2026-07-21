@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
 import { renderTemplate } from "@dm-tracker/shared";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class RemindersService {
@@ -11,8 +12,7 @@ export class RemindersService {
   ) {}
 
   async seedReminders() {
-    const now = new Date();
-    const oneDayLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const oneDayLater = DateTime.utc().plus({ days: 1 }).toJSDate();
 
     const patients = await this.prisma.patient.findMany({
       where: {
@@ -30,14 +30,16 @@ export class RemindersService {
       for (const medication of patient.medications) {
         for (const timeStr of medication.scheduleTimes) {
           const [hour, minute] = timeStr.split(":").map(Number);
-          let scheduled = this.buildWibDate(hour, minute);
-          const utc = this.wibToUtc(scheduled);
 
-          while (utc <= oneDayLater) {
+          for (
+            let scheduled = this.buildNextWibUtc(hour, minute);
+            scheduled <= oneDayLater;
+            scheduled = DateTime.fromJSDate(scheduled).plus({ days: 1 }).toJSDate()
+          ) {
             const exists = await this.prisma.reminder.findFirst({
               where: {
                 medicationId: medication.id,
-                scheduledAt: utc,
+                scheduledAt: scheduled,
               },
             });
 
@@ -46,13 +48,11 @@ export class RemindersService {
                 data: {
                   patientId: patient.id,
                   medicationId: medication.id,
-                  scheduledAt: utc,
+                  scheduledAt: scheduled,
                   status: "pending",
                 },
               });
             }
-
-            scheduled = new Date(scheduled.getTime() + 24 * 60 * 60 * 1000);
           }
         }
       }
@@ -173,13 +173,15 @@ export class RemindersService {
     }
   }
 
-  private buildWibDate(hour: number, minute: number): Date {
-    const d = new Date();
-    d.setHours(hour, minute, 0, 0);
-    return d;
-  }
+  private buildNextWibUtc(hour: number, minute: number): Date {
+    const nowWib = DateTime.now().setZone("Asia/Jakarta");
+    const todayWib = nowWib.startOf("day");
+    const targetWib = todayWib.set({ hour, minute });
 
-  private wibToUtc(date: Date): Date {
-    return new Date(date.getTime() - 7 * 60 * 60 * 1000);
+    if (targetWib <= nowWib) {
+      return targetWib.plus({ days: 1 }).toUTC().toJSDate();
+    }
+
+    return targetWib.toUTC().toJSDate();
   }
 }

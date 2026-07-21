@@ -12,6 +12,7 @@ Puskesmas DM (diabetes mellitus) medication reminder + consumption tracking syst
 - **Stack**: NestJS (TS) API + React/Vite (TS) admin dashboard + Prisma + PostgreSQL (prod)/SQLite (dev) + Redis + BullMQ + WAHA, bundled via Docker Compose, Caddy reverse proxy with TLS on homelab.
 - **Single-tenant for MVP.** No `Puskesmas` tenant scoping yet.
 - **Timezone**: Asia/Jakarta (WIB). Store DB timestamps as UTC, render in WIB. Reminder scheduling logic must convert WIB→UTC before comparing with DB.
+- **TZ library**: `luxon` (in `apps/api`). Never use `new Date().setHours()` — it depends on system timezone. Always go through `DateTime.now().setZone("Asia/Jakarta")`.
 - **Patient identity**: WhatsApp number only, registered by admin. No patient password/login/NIK/SatuseHAT in MVP. Unique on `Patient.waNumber`.
 
 ## WhatsApp gateway — WAHA (not the sibling `whatsapp-gateway` project)
