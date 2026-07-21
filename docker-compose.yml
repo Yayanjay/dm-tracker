@@ -32,10 +32,12 @@ services:
   waha:
     image: devlikeapro/waha:latest
     platform: linux/amd64
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     environment:
       WAHA_API_KEY: waha-api-key-change-me
-      WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_URL: https://dm.your-homelab.com/api/v1/webhooks/waha
+      WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_URL: http://host.docker.internal:3000/api/v1/webhooks/waha
       WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_EVENTS: message,session.status
     ports:
       - "127.0.0.1:3001:3000"
