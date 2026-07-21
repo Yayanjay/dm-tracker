@@ -12,6 +12,7 @@ import { QueueModule } from "./queue/queue.module";
 import { RemindersModule } from "./reminders/reminders.module";
 import { WahaWebhookModule } from "./waha-webhook/waha-webhook.module";
 import { ConsumptionModule } from "./consumption/consumption.module";
+import { HealthController } from "./health.controller";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
 
@@ -36,5 +37,6 @@ import { join } from "path";
     WahaWebhookModule,
     ConsumptionModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

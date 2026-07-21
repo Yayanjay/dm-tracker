@@ -24,7 +24,7 @@ services:
     restart: unless-stopped
     environment:
       WAHA_API_KEY: waha-api-key-change-me
-      WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_URL: https://dm.your-homelab.com/webhooks/waha
+      WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_URL: https://dm.your-homelab.com/api/v1/webhooks/waha
       WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_EVENTS: message,session.status
     ports:
       - "127.0.0.1:3001:3000"
@@ -47,7 +47,7 @@ services:
       WAHA_API_URL: http://waha:3000
       WAHA_API_KEY: waha-api-key-change-me
       WAHA_SESSION_NAME: default
-      WAHA_WEBHOOK_URL: https://dm.your-homelab.com/webhooks/waha
+      WAHA_WEBHOOK_URL: https://dm.your-homelab.com/api/v1/webhooks/waha
       PUBLIC_BASE_URL: https://dm.your-homelab.com
       APP_PORT: "3000"
       TZ: Asia/Jakarta

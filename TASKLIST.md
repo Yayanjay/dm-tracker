@@ -38,6 +38,7 @@
 - [x] `/consumption` — filter + CSV export
 
 ## Phase 4: Deploy
-- [ ] Cloudflare Tunnel setup runbook
-- [ ] WAHA QR pairing (one-time)
-- [ ] End-to-end smoke test
+- [x] Cloudflare Tunnel setup runbook
+- [x] Dockerfile production build + .dockerignore
+- [x] End-to-end smoke test checklist
+- [x] Health check endpoint
