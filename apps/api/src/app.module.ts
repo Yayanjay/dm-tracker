@@ -14,11 +14,18 @@ import { WahaWebhookModule } from "./waha-webhook/waha-webhook.module";
 import { ConsumptionModule } from "./consumption/consumption.module";
 import { HealthController } from "./health.controller";
 import { ServeStaticModule } from "@nestjs/serve-static";
-import { join } from "path";
+import { join, resolve } from "path";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [
+        join(process.cwd(), ".env"),
+        join(process.cwd(), "..", "..", ".env"),
+      ],
+      ignoreEnvFile: process.env.NODE_ENV === "production",
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "..", "web", "dist"),
       exclude: ["/api/(.*)"],
