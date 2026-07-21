@@ -1,0 +1,109 @@
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import axios, { AxiosInstance } from "axios";
+
+export interface WahaButton {
+  type: "reply";
+  text: string;
+}
+
+@Injectable()
+export class WahaClientService {
+  private client: AxiosInstance;
+  private sessionName: string;
+
+  constructor(private config: ConfigService) {
+    const apiUrl = config.get<string>("WAHA_API_URL", "http://localhost:3001");
+    const apiKey = config.get<string>("WAHA_API_KEY", "waha-api-key-change-me");
+    this.sessionName = config.get<string>("WAHA_SESSION_NAME", "default");
+
+    this.client = axios.create({
+      baseURL: apiUrl,
+      headers: { "X-Api-Key": apiKey, "Content-Type": "application/json" },
+      timeout: 10000,
+    });
+  }
+
+  async sendButtons(
+    chatId: string,
+    header: string,
+    body: string,
+    footer: string,
+    buttons: WahaButton[],
+  ): Promise<string> {
+    try {
+      const { data } = await this.client.post("/api/sendButtons", {
+        session: this.sessionName,
+        chatId,
+        header,
+        body,
+        footer,
+        buttons,
+      });
+      return data?.id ?? "unknown";
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        `Gagal mengirim pesan WA: ${error.response?.data?.message || error.message}`,
+      );
+    }
+  }
+
+  async sendText(chatId: string, text: string): Promise<string> {
+    try {
+      const { data } = await this.client.post("/api/sendText", {
+        session: this.sessionName,
+        chatId,
+        text,
+      });
+      return data?.id ?? "unknown";
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        `Gagal mengirim pesan teks: ${error.response?.data?.message || error.message}`,
+      );
+    }
+  }
+
+  async startSession(): Promise<void> {
+    try {
+      await this.client.post(`/api/sessions/${this.sessionName}/start`);
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        `Gagal memulai session WAHA: ${error.response?.data?.message || error.message}`,
+      );
+    }
+  }
+
+  async stopSession(): Promise<void> {
+    try {
+      await this.client.post(`/api/sessions/${this.sessionName}/stop`);
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        `Gagal menghentikan session WAHA: ${error.response?.data?.message || error.message}`,
+      );
+    }
+  }
+
+  async getSessionStatus(): Promise<{ status: string; number?: string }> {
+    try {
+      const { data } = await this.client.get(`/api/sessions/${this.sessionName}`);
+      return {
+        status: data?.status ?? "STOPPED",
+        number: data?.me?.id?.replace("@c.us", "") ?? undefined,
+      };
+    } catch (error: any) {
+      return { status: "STOPPED" };
+    }
+  }
+
+  async getQr(): Promise<Buffer | null> {
+    try {
+      const { data } = await this.client.get(
+        `/api/${this.sessionName}/auth/qr?format=image`,
+        { responseType: "arraybuffer" },
+      );
+      return Buffer.from(data);
+    } catch {
+      return null;
+    }
+  }
+}

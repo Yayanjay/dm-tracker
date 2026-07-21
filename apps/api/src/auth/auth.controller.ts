@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LoginRequest, LoginResponse, ApiResponse } from "@dm-tracker/shared";
+import { LoginRequest, LoginResponse } from "@dm-tracker/shared";
 
 @Controller("auth")
 export class AuthController {
@@ -8,12 +8,7 @@ export class AuthController {
 
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    const result = await this.authService.login(dto);
-    return {
-      code: HttpStatus.OK,
-      message: "Login berhasil",
-      data: result,
-    };
+  async login(@Body() dto: LoginRequest): Promise<LoginResponse> {
+    return this.authService.login(dto);
   }
 }

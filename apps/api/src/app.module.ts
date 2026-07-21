@@ -1,7 +1,17 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "./prisma/prisma.module";
+import { RedisModule } from "./redis/redis.module";
 import { AuthModule } from "./auth/auth.module";
+import { WahaClientModule } from "./waha-client/waha-client.module";
+import { WhatsappSessionModule } from "./whatsapp-session/whatsapp-session.module";
+import { TemplatesModule } from "./templates/templates.module";
+import { PatientsModule } from "./patients/patients.module";
+import { MedicationsModule } from "./medications/medications.module";
+import { QueueModule } from "./queue/queue.module";
+import { RemindersModule } from "./reminders/reminders.module";
+import { WahaWebhookModule } from "./waha-webhook/waha-webhook.module";
+import { ConsumptionModule } from "./consumption/consumption.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
 
@@ -14,7 +24,17 @@ import { join } from "path";
       serveRoot: "/",
     }),
     PrismaModule,
+    RedisModule,
     AuthModule,
+    WahaClientModule,
+    WhatsappSessionModule,
+    TemplatesModule,
+    PatientsModule,
+    MedicationsModule,
+    QueueModule,
+    RemindersModule,
+    WahaWebhookModule,
+    ConsumptionModule,
   ],
 })
 export class AppModule {}

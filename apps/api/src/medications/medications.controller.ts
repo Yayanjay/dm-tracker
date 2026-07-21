@@ -1,0 +1,40 @@
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+} from "@nestjs/common";
+import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
+import { MedicationsService } from "./medications.service";
+import { CreateMedicationDto } from "./dto/create-medication.dto";
+import { UpdateMedicationDto } from "./dto/update-medication.dto";
+import { PaginationRequest } from "@dm-tracker/shared";
+
+@Controller("medications")
+@UseGuards(JwtAuthGuard)
+export class MedicationsController {
+  constructor(private medicationsService: MedicationsService) {}
+
+  @Post("list")
+  async list(@Body() dto: PaginationRequest & { patientId?: string }) {
+    return this.medicationsService.list(dto);
+  }
+
+  @Get(":id")
+  async get(@Param("id") id: string) {
+    return this.medicationsService.findById(id);
+  }
+
+  @Post()
+  async create(@Body() dto: CreateMedicationDto) {
+    return this.medicationsService.create(dto);
+  }
+
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body() dto: UpdateMedicationDto) {
+    return this.medicationsService.update(id, dto);
+  }
+}

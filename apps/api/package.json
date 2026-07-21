@@ -13,6 +13,7 @@
   "dependencies": {
     "@dm-tracker/prisma": "workspace:*",
     "@dm-tracker/shared": "workspace:*",
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.0",
@@ -21,6 +22,7 @@
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/serve-static": "^5.0.0",
+    "axios": "^1.18.1",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.41.0",
     "class-transformer": "^0.5.1",
@@ -39,7 +41,7 @@
     "@types/node": "^22.0.0",
     "@types/passport-jwt": "^4.0.1",
     "eslint": "^9.0.0",
-    "typescript": "^5.7.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
   }
 }

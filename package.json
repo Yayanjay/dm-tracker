@@ -18,12 +18,34 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "-",
+      ",",
+      "@",
       "@prisma/client",
       "@prisma/engines",
-      "prisma",
+      "/",
+      "a",
+      "b",
       "bcrypt",
+      "c",
+      "d",
+      "e",
       "esbuild",
-      "msgpackr-extract"
+      "g",
+      "i",
+      "k",
+      "l",
+      "m",
+      "msgpackr-extract",
+      "n",
+      "p",
+      "prisma",
+      "r",
+      "s",
+      "t",
+      "u",
+      "x",
+      "y"
     ]
   }
 }

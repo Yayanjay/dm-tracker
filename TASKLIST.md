@@ -20,14 +20,14 @@
 - [x] `docs/features/008-whatsapp-session/DECISIONS.md`
 
 ## Phase 2: Implementation
-- [ ] `feature/001-auth` — admin login, JWT, guards
-- [ ] `feature/008-whatsapp-session` — start/stop session, QR proxy, status
-- [ ] `feature/007-waha-client` — WAHA HTTP client, sendButtons, retry
-- [ ] `feature/004-templates` — template CRUD + renderer
-- [ ] `feature/002-patients` — patient CRUD + opt-in auto-queue
-- [ ] `feature/003-medications` — medication CRUD per patient
-- [ ] `feature/005-reminders` — Reminder seeder, missed-marker job
-- [ ] `feature/006-consumption` — WAHA webhook, button+keyword parse
+- [x] `feature/001-auth` — admin login, JWT, guards
+- [x] `feature/008-whatsapp-session` — start/stop session, QR proxy, status
+- [x] `feature/007-waha-client` — WAHA HTTP client, sendButtons, retry
+- [x] `feature/004-templates` — template CRUD + renderer
+- [x] `feature/002-patients` — patient CRUD + opt-in auto-queue
+- [x] `feature/003-medications` — medication CRUD per patient
+- [x] `feature/005-reminders` — Reminder seeder, missed-marker job
+- [x] `feature/006-consumption` — WAHA webhook, button+keyword parse
 
 ## Phase 3: Admin Dashboard
 - [ ] `/login` + auth flow

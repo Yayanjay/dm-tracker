@@ -16,7 +16,7 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      request["admin"] = payload;
+      request["admin"] = { id: payload.sub, email: payload.email, role: payload.role };
       return true;
     } catch {
       throw new UnauthorizedException("Token tidak valid atau sudah kedaluwarsa");
