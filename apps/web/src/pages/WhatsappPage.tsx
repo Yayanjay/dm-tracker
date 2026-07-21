@@ -19,7 +19,9 @@ export default function WhatsappPage() {
   const [status, setStatus] = useState<SessionStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [qrTs, setQrTs] = useState(Date.now());
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval>>();
+  const qrBlobRef = useRef<string | null>(null);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -30,10 +32,30 @@ export default function WhatsappPage() {
     }
   }, []);
 
+  const fetchQr = useCallback(async () => {
+    try {
+      const response = await api.get("/whatsapp/session/qr", {
+        responseType: "blob",
+      });
+      if (qrBlobRef.current) URL.revokeObjectURL(qrBlobRef.current);
+      const blobUrl = URL.createObjectURL(response.data);
+      qrBlobRef.current = blobUrl;
+      setQrUrl(blobUrl);
+    } catch {
+      setQrUrl(null);
+    }
+  }, []);
+
   useEffect(() => {
     fetchStatus();
     return () => clearInterval(pollingRef.current);
   }, [fetchStatus]);
+
+  useEffect(() => {
+    return () => {
+      if (qrBlobRef.current) URL.revokeObjectURL(qrBlobRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     clearInterval(pollingRef.current);
@@ -45,10 +67,15 @@ export default function WhatsappPage() {
 
   useEffect(() => {
     if (status?.status === "SCAN_QR_CODE") {
-      const t = setInterval(() => setQrTs(Date.now()), 25000);
-      return () => clearInterval(t);
+      fetchQr();
+    } else {
+      if (qrBlobRef.current) {
+        URL.revokeObjectURL(qrBlobRef.current);
+        qrBlobRef.current = null;
+      }
+      setQrUrl(null);
     }
-  }, [status?.status]);
+  }, [status?.status, qrTs, fetchQr]);
 
   const handleAction = async (action: "start" | "stop") => {
     setLoading(true);
@@ -82,13 +109,13 @@ export default function WhatsappPage() {
         </div>
       )}
 
-      {status?.status === "SCAN_QR_CODE" && (
+      {status?.status === "SCAN_QR_CODE" && qrUrl && (
         <div className="rounded-lg border p-4 space-y-3">
           <p className="text-sm text-muted-foreground">
             Scan QR code ini dari WhatsApp → Perangkat tertaut → Tautkan perangkat
           </p>
           <img
-            src={`/api/v1/whatsapp/session/qr?t=${qrTs}`}
+            src={qrUrl}
             alt="QR Code"
             className="mx-auto w-64 h-64"
           />
@@ -99,6 +126,13 @@ export default function WhatsappPage() {
             <RefreshCw className="h-4 w-4" />
             Refresh QR
           </button>
+        </div>
+      )}
+
+      {status?.status === "SCAN_QR_CODE" && !qrUrl && (
+        <div className="rounded-lg border p-4 text-center">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="mt-2 text-sm text-muted-foreground">Memuat QR Code...</p>
         </div>
       )}
 
