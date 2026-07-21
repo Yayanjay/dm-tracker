@@ -176,6 +176,7 @@ export class PatientsService {
           kind: "opt_in",
           payload: { chatId, body, buttons: template.buttonLabels },
           status: "sent",
+          createdById: "SYSTEM",
         },
       });
     } catch {
@@ -186,6 +187,7 @@ export class PatientsService {
           payload: { chatId, body, buttons: template.buttonLabels },
           status: "failed",
           error: "Gagal mengirim pesan opt-in",
+          createdById: "SYSTEM",
         },
       });
     }

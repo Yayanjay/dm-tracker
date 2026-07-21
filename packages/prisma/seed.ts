@@ -59,7 +59,7 @@ async function main() {
     await prisma.templateMessage.upsert({
       where: { key: template.key },
       update: template,
-      create: template,
+      create: { ...template, createdById: "SYSTEM" },
     });
   }
 

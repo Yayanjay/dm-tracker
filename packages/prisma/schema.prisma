@@ -65,6 +65,7 @@ model Admin {
   name         String
   role         AdminRole @default(superadmin)
   createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
 
   patients Patient[]
 
@@ -80,6 +81,7 @@ model Patient {
   consentAt     DateTime?     @map("consent_at")
   active        Boolean       @default(true)
   createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at")
   createdById   String        @map("created_by_id")
 
   createdBy Admin          @relation(fields: [createdById], references: [id])
@@ -102,6 +104,8 @@ model Medication {
   scheduleTimes String[] @map("schedule_times")
   active       Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  createdById  String   @default("") @map("created_by_id")
 
   patient    Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
   reminders   Reminder[]
@@ -119,6 +123,9 @@ model Reminder {
   status       ReminderStatus @default(pending)
   sentAt       DateTime?      @map("sent_at")
   wahaMessageId String?       @map("waha_message_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at")
+  createdById   String        @default("SYSTEM") @map("created_by_id")
 
   patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
   medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
@@ -139,6 +146,9 @@ model ConsumptionLog {
   source       ConsumptionSource
   rawText      String?           @map("raw_text")
   reportedAt   DateTime          @default(now()) @map("reported_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @default(now()) @updatedAt @map("updated_at")
+  createdById  String            @default("SYSTEM") @map("created_by_id")
 
   patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
   medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
@@ -157,7 +167,9 @@ model TemplateMessage {
   title        String
   body         String
   buttonLabels String[]     @default([]) @map("button_labels")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @default(now()) @updatedAt @map("updated_at")
+  createdById  String       @default("SYSTEM") @map("created_by_id")
 
   @@map("template_messages")
 }
@@ -171,6 +183,8 @@ model OutboundMessage {
   status       OutboundStatus @default(pending)
   error        String?
   createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at")
+  createdById  String         @default("SYSTEM") @map("created_by_id")
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 

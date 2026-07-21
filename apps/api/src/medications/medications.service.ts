@@ -71,7 +71,7 @@ export class MedicationsService {
     return { data: medication };
   }
 
-  async create(dto: CreateMedicationDto) {
+  async create(dto: CreateMedicationDto, adminId: string) {
     const patient = await this.prisma.patient.findUnique({
       where: { id: dto.patientId },
     });
@@ -87,6 +87,7 @@ export class MedicationsService {
         dosage: dto.dosage,
         unit: dto.unit,
         scheduleTimes: dto.scheduleTimes,
+        createdById: adminId,
       },
     });
 

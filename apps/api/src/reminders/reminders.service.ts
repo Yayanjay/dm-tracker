@@ -50,6 +50,7 @@ export class RemindersService {
                   medicationId: medication.id,
                   scheduledAt: scheduled,
                   status: "pending",
+                  createdById: "SYSTEM",
                 },
               });
             }
@@ -110,6 +111,7 @@ export class RemindersService {
             payload: { chatId, body, buttons: template.buttonLabels },
             wahaMessageId,
             status: "sent",
+            createdById: "SYSTEM",
           },
         });
       } catch (error: any) {
@@ -125,6 +127,7 @@ export class RemindersService {
             payload: { chatId },
             status: "failed",
             error: error.message,
+            createdById: "SYSTEM",
           },
         });
       }
@@ -168,6 +171,7 @@ export class RemindersService {
           reminderId: reminder.id,
           status: "missed",
           source: "system_missed",
+          createdById: "SYSTEM",
         },
       });
     }

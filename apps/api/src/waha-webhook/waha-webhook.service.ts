@@ -97,6 +97,7 @@ export class WahaWebhookService {
           status,
           source,
           rawText: buttonText || body || null,
+          createdById: "SYSTEM",
         },
       });
     } else {
@@ -113,6 +114,7 @@ export class WahaWebhookService {
             status,
             source,
             rawText: buttonText || body || null,
+            createdById: "SYSTEM",
           },
         });
       }

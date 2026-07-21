@@ -6,6 +6,7 @@ import {
   Body,
   Param,
   UseGuards,
+  Req,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { MedicationsService } from "./medications.service";
@@ -29,8 +30,8 @@ export class MedicationsController {
   }
 
   @Post()
-  async create(@Body() dto: CreateMedicationDto) {
-    return this.medicationsService.create(dto);
+  async create(@Body() dto: CreateMedicationDto, @Req() req: any) {
+    return this.medicationsService.create(dto, req.admin.id);
   }
 
   @Patch(":id")
