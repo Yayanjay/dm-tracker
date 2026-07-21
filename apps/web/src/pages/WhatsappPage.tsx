@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import api from "../lib/api";
+import { useToast } from "../lib/toast";
 import { Smartphone, CheckCircle, XCircle, RefreshCw, Loader2 } from "lucide-react";
 
 interface SessionStatus {
@@ -16,6 +17,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: typeof 
 };
 
 export default function WhatsappPage() {
+  const { toast } = useToast();
   const [status, setStatus] = useState<SessionStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [qrTs, setQrTs] = useState(Date.now());
@@ -93,7 +95,7 @@ export default function WhatsappPage() {
         }, 30000);
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal");
+      toast(err.response?.data?.message || "Gagal", "error");
     }
     setLoading(false);
   };

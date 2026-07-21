@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
+import { useToast } from "../lib/toast";
 import type { PaginationResponse } from "@dm-tracker/shared";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -25,6 +26,7 @@ const sourceLabels: Record<string, string> = {
 };
 
 export default function ConsumptionPage() {
+  const { toast } = useToast();
   const [rows, setRows] = useState<ConsumptionRow[]>([]);
   const [pagination, setPagination] = useState<PaginationResponse | null>(null);
   const [page, setPage] = useState(1);
@@ -55,7 +57,7 @@ export default function ConsumptionPage() {
       a.download = "consumption-export.csv";
       a.click();
     } catch {
-      alert("Gagal mengekspor");
+      toast("Gagal mengekspor", "error");
     }
   };
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../lib/api";
+import { useToast } from "../lib/toast";
 import { Plus, Trash2 } from "lucide-react";
 
 interface Medication {
@@ -19,6 +20,7 @@ interface Patient {
 
 export default function PatientMedicationsPage() {
   const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [meds, setMeds] = useState<Medication[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -62,8 +64,9 @@ export default function PatientMedicationsPage() {
       }
       setShowModal(false);
       fetchData();
+      toast(editing ? "Obat berhasil diperbarui" : "Obat berhasil ditambahkan");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal");
+      toast(err.response?.data?.message || "Gagal", "error");
     }
     setSubmitting(false);
   };
@@ -72,6 +75,7 @@ export default function PatientMedicationsPage() {
     if (!confirm("Nonaktifkan obat ini?")) return;
     await api.patch(`/medications/${medId}`, { active: false });
     fetchData();
+    toast("Obat dinonaktifkan");
   };
 
   return (

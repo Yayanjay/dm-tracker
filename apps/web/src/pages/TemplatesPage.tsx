@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
+import { useToast } from "../lib/toast";
 
 interface Template {
   key: string;
@@ -18,6 +19,7 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function TemplatesPage() {
+  const { toast } = useToast();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selected, setSelected] = useState<Template | null>(null);
   const [editing, setEditing] = useState(false);
@@ -55,9 +57,9 @@ export default function TemplatesPage() {
       await api.patch(`/templates/${selected.key}`, { title: form.title, body: form.body, buttonLabels: labels });
       await fetchTemplates();
       setEditing(false);
-      alert("Template disimpan");
+      toast("Template disimpan");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal menyimpan");
+      toast(err.response?.data?.message || "Gagal menyimpan", "error");
     }
     setSubmitting(false);
   };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
+import { useToast } from "../lib/toast";
 import type { PaginationResponse } from "@dm-tracker/shared";
 import { UserPlus, Send, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -14,6 +15,7 @@ interface Patient {
 
 export default function PatientsPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [pagination, setPagination] = useState<PaginationResponse | null>(null);
   const [page, setPage] = useState(1);
@@ -63,8 +65,9 @@ export default function PatientsPage() {
       }
       setShowModal(false);
       fetchPatients();
+      toast(editing ? "Pasien berhasil diperbarui" : "Pasien berhasil ditambahkan");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal");
+      toast(err.response?.data?.message || "Gagal", "error");
     }
     setSubmitting(false);
   };
@@ -72,9 +75,9 @@ export default function PatientsPage() {
   const handleResend = async (id: string) => {
     try {
       await api.post(`/patients/${id}/resend-optin`);
-      alert("Opt-in dikirim ulang");
+      toast("Opt-in dikirim ulang");
     } catch {
-      alert("Gagal mengirim ulang opt-in");
+      toast("Gagal mengirim ulang opt-in", "error");
     }
   };
 
