@@ -30,12 +30,12 @@
 - [x] `feature/006-consumption` — WAHA webhook, button+keyword parse
 
 ## Phase 3: Admin Dashboard
-- [ ] `/login` + auth flow
-- [ ] `/whatsapp` — session pairing UI
-- [ ] `/patients` — list, create, edit, re-send opt-in
-- [ ] `/patients/:id/medications` — medication CRUD per patient
-- [ ] `/templates` — template CRUD with live preview
-- [ ] `/consumption` — filter + CSV export
+- [x] `/login` + auth flow
+- [x] `/whatsapp` — session pairing UI
+- [x] `/patients` — list, create, edit, re-send opt-in
+- [x] `/patients/:id/medications` — medication CRUD per patient
+- [x] `/templates` — template CRUD with live preview
+- [x] `/consumption` — filter + CSV export
 
 ## Phase 4: Deploy
 - [ ] Cloudflare Tunnel setup runbook

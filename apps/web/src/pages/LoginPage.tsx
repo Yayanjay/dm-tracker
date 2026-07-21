@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/api";
 import type { LoginResponse, ApiResponse } from "@dm-tracker/shared";
 
 export default function LoginPage() {
@@ -10,14 +10,20 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/");
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const { data } = await axios.post<ApiResponse<LoginResponse>>(
-        "/api/v1/auth/login",
+      const { data } = await api.post<ApiResponse<LoginResponse>>(
+        "/auth/login",
         { email, password },
       );
       localStorage.setItem("token", data.data.accessToken);
@@ -64,9 +70,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <button
             type="submit"

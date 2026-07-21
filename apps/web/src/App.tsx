@@ -1,5 +1,12 @@
 import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
+import WhatsappPage from "./pages/WhatsappPage";
+import PatientsPage from "./pages/PatientsPage";
+import PatientMedicationsPage from "./pages/PatientMedicationsPage";
+import TemplatesPage from "./pages/TemplatesPage";
+import ConsumptionPage from "./pages/ConsumptionPage";
 
 function App() {
   return (
@@ -8,9 +15,18 @@ function App() {
       <Route
         path="*"
         element={
-          <div className="flex min-h-screen items-center justify-center">
-            <p className="text-muted-foreground">DM Tracker - Puskesmas</p>
-          </div>
+          <ProtectedRoute>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<PatientsPage />} />
+                <Route path="/whatsapp" element={<WhatsappPage />} />
+                <Route path="/patients" element={<PatientsPage />} />
+                <Route path="/patients/:id/medications" element={<PatientMedicationsPage />} />
+                <Route path="/templates" element={<TemplatesPage />} />
+                <Route path="/consumption" element={<ConsumptionPage />} />
+              </Routes>
+            </Layout>
+          </ProtectedRoute>
         }
       />
     </Routes>
