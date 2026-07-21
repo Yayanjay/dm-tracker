@@ -7,6 +7,7 @@ import PatientsPage from "./pages/PatientsPage";
 import PatientMedicationsPage from "./pages/PatientMedicationsPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import ConsumptionPage from "./pages/ConsumptionPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/patients/:id/medications" element={<PatientMedicationsPage />} />
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route path="/consumption" element={<ConsumptionPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>
           </ProtectedRoute>
