@@ -1,0 +1,29 @@
+{
+  "name": "dm-tracker",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @dm-tracker/api dev\" \"pnpm --filter @dm-tracker/web dev\"",
+    "build": "pnpm --filter @dm-tracker/shared build && pnpm --filter @dm-tracker/api build && pnpm --filter @dm-tracker/web build",
+    "lint": "pnpm --filter @dm-tracker/api lint && pnpm --filter @dm-tracker/web lint",
+    "prisma:generate": "pnpm --filter @dm-tracker/prisma generate",
+    "prisma:migrate": "pnpm --filter @dm-tracker/prisma migrate",
+    "prisma:push": "pnpm --filter @dm-tracker/prisma push",
+    "prisma:seed": "pnpm --filter @dm-tracker/prisma seed",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "bcrypt",
+      "esbuild",
+      "msgpackr-extract"
+    ]
+  }
+}

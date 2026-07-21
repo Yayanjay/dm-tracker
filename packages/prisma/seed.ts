@@ -1,0 +1,76 @@
+import { PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcrypt";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  const passwordHash = await bcrypt.hash("admin123", 10);
+
+  await prisma.admin.upsert({
+    where: { email: "admin@puskesmas.local" },
+    update: {},
+    create: {
+      email: "admin@puskesmas.local",
+      passwordHash,
+      name: "Admin Puskesmas",
+      role: "superadmin",
+    },
+  });
+
+  const templates = [
+    {
+      type: "enrollment" as const,
+      key: "enrollment",
+      title: "Program Pemantauan Obat DM",
+      body: "Halo {{name}},\n\nAnda telah didaftarkan dalam program pemantauan konsumsi obat DM oleh Puskesmas. Apakah Anda bersedia untuk mengikuti program ini?",
+      buttonLabels: ["Setuju", "Nanti saja"],
+    },
+    {
+      type: "reminder" as const,
+      key: "reminder",
+      title: "Pengingat Minum Obat",
+      body: "Halo {{name}},\n\nSaatnya minum obat {{medication_name}} dosis {{dosage}} {{unit}}.\n\nApakah Anda sudah meminum obat?",
+      buttonLabels: ["Sudah minum", "Belum"],
+    },
+    {
+      type: "optin_confirm" as const,
+      key: "optin_confirm",
+      title: "Pendaftaran Berhasil",
+      body: "Terima kasih {{name}}, Anda telah terdaftar dalam program pemantauan konsumsi obat DM. Anda akan menerima pengingat sesuai jadwal pengobatan.\n\nJika ada pertanyaan, silakan hubungi Puskesmas.",
+      buttonLabels: [],
+    },
+    {
+      type: "usage_hint" as const,
+      key: "usage_hint",
+      title: "Cara Membalas",
+      body: "Balas dengan kata kunci:\n- *Sudah* atau *Minum* jika sudah minum obat\n- *Belum* atau *Lewati* jika belum minum obat\n\nAtau gunakan tombol yang tersedia pada pesan pengingat.",
+      buttonLabels: [],
+    },
+    {
+      type: "already_opted_in" as const,
+      key: "already_opted_in",
+      title: "Sudah Terdaftar",
+      body: "Halo {{name}}, Anda sudah terdaftar dalam program pemantauan konsumsi obat DM. Anda akan menerima pengingat sesuai jadwal pengobatan.",
+      buttonLabels: [],
+    },
+  ];
+
+  for (const template of templates) {
+    await prisma.templateMessage.upsert({
+      where: { key: template.key },
+      update: template,
+      create: template,
+    });
+  }
+
+  console.log("Seed completed: admin + default template messages created.");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

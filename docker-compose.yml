@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dm_tracker
+      POSTGRES_PASSWORD: dm_tracker_pass
+      POSTGRES_DB: dm_tracker
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata:/data
+
+  waha:
+    image: devlikeapro/waha:latest
+    restart: unless-stopped
+    environment:
+      WAHA_API_KEY: waha-api-key-change-me
+      WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_URL: https://dm.your-homelab.com/webhooks/waha
+      WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_EVENTS: message,session.status
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - ./.sessions:/app/.sessions
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://dm_tracker:dm_tracker_pass@postgres:5432/dm_tracker?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: change-me-in-production-use-a-long-random-string
+      JWT_ACCESS_EXPIRES: 1h
+      JWT_REFRESH_EXPIRES: 7d
+      WAHA_API_URL: http://waha:3000
+      WAHA_API_KEY: waha-api-key-change-me
+      WAHA_SESSION_NAME: default
+      WAHA_WEBHOOK_URL: https://dm.your-homelab.com/webhooks/waha
+      PUBLIC_BASE_URL: https://dm.your-homelab.com
+      APP_PORT: "3000"
+      TZ: Asia/Jakarta
+    depends_on:
+      - postgres
+      - redis
+      - waha
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConsentStatus {
+  pending
+  opted_in
+  opted_out
+}
+
+enum ReminderStatus {
+  pending
+  sent
+  confirmed
+  missed
+  failed
+}
+
+enum ConsumptionStatus {
+  taken
+  skipped
+  missed
+}
+
+enum ConsumptionSource {
+  button
+  free_text
+  system_missed
+}
+
+enum TemplateType {
+  enrollment
+  reminder
+  optin_confirm
+  usage_hint
+  already_opted_in
+}
+
+enum AdminRole {
+  superadmin
+}
+
+enum OutboundKind {
+  opt_in
+  reminder
+  usage_hint
+  opt_in_confirm
+}
+
+enum OutboundStatus {
+  pending
+  sent
+  failed
+}
+
+model Admin {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(superadmin)
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  patients Patient[]
+
+  @@map("admins")
+}
+
+model Patient {
+  id            String        @id @default(cuid())
+  name          String
+  waNumber      String        @unique @map("wa_number")
+  phone         String?
+  dob           DateTime?
+  consentStatus ConsentStatus @default(pending) @map("consent_status")
+  consentAt     DateTime?     @map("consent_at")
+  active        Boolean       @default(true)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  createdById   String        @map("created_by_id")
+
+  createdBy Admin          @relation(fields: [createdById], references: [id])
+  medications Medication[]
+  reminders   Reminder[]
+  consumptionLogs ConsumptionLog[]
+  outboundMessages OutboundMessage[]
+
+  @@index([consentStatus])
+  @@index([active])
+  @@map("patients")
+}
+
+model Medication {
+  id           String   @id @default(cuid())
+  patientId    String   @map("patient_id")
+  name         String
+  dosage       String
+  unit         String
+  scheduleTimes String[] @map("schedule_times")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  patient    Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+  consumptionLogs ConsumptionLog[]
+
+  @@index([patientId])
+  @@map("medications")
+}
+
+model Reminder {
+  id           String         @id @default(cuid())
+  patientId    String         @map("patient_id")
+  medicationId String         @map("medication_id")
+  scheduledAt  DateTime       @map("scheduled_at")
+  status       ReminderStatus @default(pending)
+  sentAt       DateTime?      @map("sent_at")
+  wahaMessageId String?       @map("waha_message_id")
+
+  patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  consumptionLogs ConsumptionLog[]
+
+  @@index([patientId, scheduledAt, status])
+  @@index([medicationId, scheduledAt])
+  @@index([status])
+  @@map("reminders")
+}
+
+model ConsumptionLog {
+  id           String            @id @default(cuid())
+  patientId    String            @map("patient_id")
+  medicationId String            @map("medication_id")
+  reminderId   String?           @map("reminder_id")
+  status       ConsumptionStatus
+  source       ConsumptionSource
+  rawText      String?           @map("raw_text")
+  reportedAt   DateTime          @default(now()) @map("reported_at")
+
+  patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  reminder   Reminder?  @relation(fields: [reminderId], references: [id])
+
+  @@index([patientId])
+  @@index([medicationId])
+  @@index([reminderId])
+  @@map("consumption_logs")
+}
+
+model TemplateMessage {
+  id           String       @id @default(cuid())
+  type         TemplateType
+  key          String       @unique
+  title        String
+  body         String
+  buttonLabels String[]     @default([]) @map("button_labels")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@map("template_messages")
+}
+
+model OutboundMessage {
+  id           String         @id @default(cuid())
+  patientId    String         @map("patient_id")
+  kind         OutboundKind
+  payload      Json
+  wahaMessageId String?       @map("waha_message_id")
+  status       OutboundStatus @default(pending)
+  error        String?
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([status])
+  @@map("outbound_messages")
+}
