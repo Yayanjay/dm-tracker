@@ -4,4 +4,4 @@ dist/
 *.db
 *.db-journal
 .sessions/
-.turbo/
+*.tsbuildinfo
