@@ -1,0 +1,39 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgresql://dm_tracker:dm_tracker_pass@postgres:5432/dm_tracker?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-not-for-production
+      JWT_ACCESS_EXPIRES: 24h
+      WAHA_API_URL: http://waha:3000
+      WAHA_API_KEY: dev-api-key
+      WAHA_SESSION_NAME: default
+      WAHA_WEBHOOK_URL: http://localhost:3000/api/v1/webhooks/waha
+      PUBLIC_BASE_URL: http://localhost:5173
+      APP_PORT: "3000"
+      TZ: Asia/Jakarta
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && pnpm install --frozen-lockfile=false && pnpm --filter @dm-tracker/web dev"
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      - api

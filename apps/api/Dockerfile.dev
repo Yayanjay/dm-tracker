@@ -1,0 +1,9 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@10 --activate
+
+EXPOSE 3000
+
+CMD ["sh", "-c", "pnpm --filter @dm-tracker/prisma generate && pnpm dev"]

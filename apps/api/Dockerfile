@@ -26,16 +26,22 @@ FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
+RUN corepack enable && corepack prepare pnpm@10 --activate
+
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
 COPY --from=builder /app/packages/prisma ./packages/prisma
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/entrypoint.sh ./apps/api/entrypoint.sh
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY --from=builder /app/apps/web/dist ./apps/web/dist
 COPY --from=builder /app/pnpm-workspace.yaml .
 COPY --from=builder /app/package.json .
+COPY --from=builder /app/pnpm-lock.yaml .
+
+RUN chmod +x apps/api/entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["node", "apps/api/dist/main.js"]
+ENTRYPOINT ["apps/api/entrypoint.sh"]

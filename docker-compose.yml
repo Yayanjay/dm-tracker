@@ -10,6 +10,11 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dm_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -18,6 +23,11 @@ services:
       - "127.0.0.1:6379:6379"
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   waha:
     image: devlikeapro/waha:latest
@@ -52,9 +62,10 @@ services:
       APP_PORT: "3000"
       TZ: Asia/Jakarta
     depends_on:
-      - postgres
-      - redis
-      - waha
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   pgdata:
