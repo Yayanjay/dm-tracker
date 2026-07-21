@@ -5,5 +5,6 @@ import { WhatsappSessionService } from "./whatsapp-session.service";
 @Module({
   controllers: [WhatsappSessionController],
   providers: [WhatsappSessionService],
+  exports: [WhatsappSessionService],
 })
 export class WhatsappSessionModule {}
