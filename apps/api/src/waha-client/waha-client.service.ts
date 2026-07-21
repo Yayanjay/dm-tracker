@@ -65,11 +65,26 @@ export class WahaClientService {
 
   async startSession(): Promise<void> {
     try {
-      await this.client.post(`/api/sessions/${this.sessionName}/start`);
+      await this.client.post("/api/sessions", {
+        name: this.sessionName,
+        start: true,
+        config: {
+          webhooks: [
+            {
+              url: this.config.get<string>("WAHA_WEBHOOK_URL"),
+              events: ["message", "session.status"],
+            },
+          ],
+        },
+      });
     } catch (error: any) {
-      throw new InternalServerErrorException(
-        `Gagal memulai session WAHA: ${error.response?.data?.message || error.message}`,
-      );
+      if (error.response?.status === 409) {
+        await this.client.post(`/api/sessions/${this.sessionName}/start`);
+      } else {
+        throw new InternalServerErrorException(
+          `Gagal memulai session WAHA: ${error.response?.data?.message || error.message}`,
+        );
+      }
     }
   }
 
