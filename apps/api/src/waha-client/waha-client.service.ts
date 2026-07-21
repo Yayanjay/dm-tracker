@@ -78,11 +78,17 @@ export class WahaClientService {
         },
       });
     } catch (error: any) {
-      if (error.response?.status === 409) {
+      const msg = error.response?.data?.message || error.message || "";
+      const alreadyExists =
+        error.response?.status === 409 ||
+        msg.toLowerCase().includes("already exists") ||
+        msg.toLowerCase().includes("use put");
+
+      if (alreadyExists) {
         await this.client.post(`/api/sessions/${this.sessionName}/start`);
       } else {
         throw new InternalServerErrorException(
-          `Gagal memulai session WAHA: ${error.response?.data?.message || error.message}`,
+          `Gagal memulai session WAHA: ${msg}`,
         );
       }
     }
