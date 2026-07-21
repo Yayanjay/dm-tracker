@@ -22,6 +22,7 @@ export default function WhatsappPage() {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval>>();
   const qrBlobRef = useRef<string | null>(null);
+  const forcePollRef = useRef<ReturnType<typeof setTimeout>>();
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -48,7 +49,10 @@ export default function WhatsappPage() {
 
   useEffect(() => {
     fetchStatus();
-    return () => clearInterval(pollingRef.current);
+    return () => {
+      clearInterval(pollingRef.current);
+      clearTimeout(forcePollRef.current);
+    };
   }, [fetchStatus]);
 
   useEffect(() => {
@@ -81,7 +85,13 @@ export default function WhatsappPage() {
     setLoading(true);
     try {
       await api.post(`/whatsapp/session/${action}`);
-      await fetchStatus();
+      if (action === "start") {
+        setStatus({ status: "STARTING", number: null });
+        const interval = setInterval(fetchStatus, 2000);
+        forcePollRef.current = setTimeout(() => {
+          clearInterval(interval);
+        }, 30000);
+      }
     } catch (err: any) {
       alert(err.response?.data?.message || "Gagal");
     }

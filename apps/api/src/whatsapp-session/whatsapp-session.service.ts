@@ -6,6 +6,7 @@ import { RedisService } from "../redis/redis.service";
 export class WhatsappSessionService {
   private readonly STATUS_KEY = "waha:session:status";
   private readonly NUMBER_KEY = "waha:session:number";
+  private readonly CACHE_TTL = 15;
 
   constructor(
     private waha: WahaClientService,
@@ -13,11 +14,24 @@ export class WhatsappSessionService {
   ) {}
 
   async start(): Promise<void> {
+    const cached = await this.redis.get(this.STATUS_KEY);
+    if (cached === "FAILED") {
+      try {
+        await this.waha.stopSession();
+      } catch {
+        // ignore stop errors before start
+      }
+    }
+
     await this.waha.startSession();
+    await this.redis.del(this.STATUS_KEY);
+    await this.redis.del(this.NUMBER_KEY);
   }
 
   async stop(): Promise<void> {
     await this.waha.stopSession();
+    await this.redis.del(this.STATUS_KEY);
+    await this.redis.del(this.NUMBER_KEY);
   }
 
   async getStatus(): Promise<{ status: string; number: string | null }> {
@@ -29,18 +43,18 @@ export class WhatsappSessionService {
     }
 
     const wahaStatus = await this.waha.getSessionStatus();
-    await this.redis.set(this.STATUS_KEY, wahaStatus.status, 120);
+    await this.redis.set(this.STATUS_KEY, wahaStatus.status, this.CACHE_TTL);
     if (wahaStatus.number) {
-      await this.redis.set(this.NUMBER_KEY, wahaStatus.number, 120);
+      await this.redis.set(this.NUMBER_KEY, wahaStatus.number, this.CACHE_TTL);
     }
 
     return { status: wahaStatus.status, number: wahaStatus.number ?? null };
   }
 
   setSessionStatus(status: string, number?: string): void {
-    this.redis.set(this.STATUS_KEY, status, 120);
+    this.redis.set(this.STATUS_KEY, status, this.CACHE_TTL);
     if (number) {
-      this.redis.set(this.NUMBER_KEY, number, 120);
+      this.redis.set(this.NUMBER_KEY, number, this.CACHE_TTL);
     }
   }
 
