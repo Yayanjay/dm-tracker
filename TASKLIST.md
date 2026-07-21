@@ -7,17 +7,17 @@
 - [x] Shared package (enums, DTOs, template-renderer)
 - [x] NestJS API skeleton (response envelope, prisma, auth)
 - [x] React+Vite admin skeleton (shadcn/ui, tanstack query)
-- [ ] `pnpm install` + verify builds
+- [x] `pnpm install` + verify builds
 
 ## Phase 1: Feature Docs
-- [ ] `docs/features/001-auth/DECISIONS.md`
-- [ ] `docs/features/002-patients/DECISIONS.md`
-- [ ] `docs/features/003-medications/DECISIONS.md`
-- [ ] `docs/features/004-templates/DECISIONS.md`
-- [ ] `docs/features/005-reminders/DECISIONS.md`
-- [ ] `docs/features/006-consumption/DECISIONS.md`
-- [ ] `docs/features/007-waha-client/DECISIONS.md`
-- [ ] `docs/features/008-whatsapp-session/DECISIONS.md`
+- [x] `docs/features/001-auth/DECISIONS.md`
+- [x] `docs/features/002-patients/DECISIONS.md`
+- [x] `docs/features/003-medications/DECISIONS.md`
+- [x] `docs/features/004-templates/DECISIONS.md`
+- [x] `docs/features/005-reminders/DECISIONS.md`
+- [x] `docs/features/006-consumption/DECISIONS.md`
+- [x] `docs/features/007-waha-client/DECISIONS.md`
+- [x] `docs/features/008-whatsapp-session/DECISIONS.md`
 
 ## Phase 2: Implementation
 - [ ] `feature/001-auth` — admin login, JWT, guards
