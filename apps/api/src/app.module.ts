@@ -22,6 +22,7 @@ import { join } from "path";
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
+        join(process.cwd(), ".env.local"),
         join(process.cwd(), ".env"),
         join(process.cwd(), "..", "..", ".env"),
       ],
