@@ -38,8 +38,8 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     restart: unless-stopped
+    env_file: .env
     environment:
-      WAHA_API_KEY: waha-api-key-change-me
       WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_URL: http://host.docker.internal:3000/api/v1/webhooks/waha
       WAHA_DEFAULT_SESSION_CONFIG_WEBHOOKS_0_EVENTS: message,session.status
     ports:
@@ -54,19 +54,14 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file: .env
     environment:
+      # Override host-local URLs with Docker-internal addresses
       DATABASE_URL: postgresql://dm_tracker:dm_tracker_pass@postgres:5432/dm_tracker?schema=public
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: change-me-in-production-use-a-long-random-string
-      JWT_ACCESS_EXPIRES: 1h
-      JWT_REFRESH_EXPIRES: 7d
       WAHA_API_URL: http://waha:3000
-      WAHA_API_KEY: waha-api-key-change-me
-      WAHA_SESSION_NAME: default
       WAHA_WEBHOOK_URL: https://dm.your-homelab.com/api/v1/webhooks/waha
       PUBLIC_BASE_URL: https://dm.your-homelab.com
-      APP_PORT: "3000"
-      TZ: Asia/Jakarta
     depends_on:
       postgres:
         condition: service_healthy
