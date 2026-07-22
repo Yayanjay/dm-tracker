@@ -13,6 +13,7 @@ const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/whatsapp", label: "WhatsApp", icon: Smartphone },
   { to: "/patients", label: "Pasien", icon: Users },
+  { to: "/medications", label: "Obat", icon: Pill },
   { to: "/templates", label: "Template Pesan", icon: FileText },
   { to: "/consumption", label: "Konsumsi", icon: Activity },
 ];

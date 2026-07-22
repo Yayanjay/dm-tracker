@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import WhatsappPage from "./pages/WhatsappPage";
 import PatientsPage from "./pages/PatientsPage";
 import PatientMedicationsPage from "./pages/PatientMedicationsPage";
+import MedicationsPage from "./pages/MedicationsPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import ConsumptionPage from "./pages/ConsumptionPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/whatsapp" element={<WhatsappPage />} />
                 <Route path="/patients" element={<PatientsPage />} />
                 <Route path="/patients/:id/medications" element={<PatientMedicationsPage />} />
+                <Route path="/medications" element={<MedicationsPage />} />
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route path="/consumption" element={<ConsumptionPage />} />
                 <Route path="*" element={<NotFoundPage />} />
