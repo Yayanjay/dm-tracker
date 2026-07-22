@@ -23,6 +23,7 @@ import { join } from "path";
       isGlobal: true,
       envFilePath: [
         join(process.cwd(), ".env.local"),
+        join(process.cwd(), "..", "..", ".env.local"),
         join(process.cwd(), ".env"),
         join(process.cwd(), "..", "..", ".env"),
       ],
