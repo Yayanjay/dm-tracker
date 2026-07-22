@@ -142,7 +142,7 @@ export class WahaClientService {
   async getPhoneByLid(lid: string): Promise<string | null> {
     try {
       const { data } = await this.client.get(
-        `/api/${this.sessionName}/lids/${lid}`,
+        `/api/${this.sessionName}/lids/${lid}@lid`,
       );
       return data?.phoneNumber?.replace(/^\+/, "").replace("@c.us", "") ?? null;
     } catch {

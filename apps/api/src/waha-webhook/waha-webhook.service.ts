@@ -61,9 +61,13 @@ export class WahaWebhookService {
       }
     }
 
-    if (!patient) return;
+    if (!patient) {
+      this.logger.warn(`Webhook: no patient found for from="${from}"`);
+      return;
+    }
 
     if (patient.consentStatus !== "opted_in") {
+      this.logger.log(`Webhook: processing consent for ${patient.name} (${patient.waNumber})`);
       await this.handleConsent(patient.id, patient.waNumber, payload);
       return;
     }
@@ -117,6 +121,7 @@ export class WahaWebhookService {
           createdById: "SYSTEM",
         },
       });
+      this.logger.log(`Consumption: ${status} by ${patient.name} via ${source}`);
     } else {
       const assignment = await this.prisma.patientMedication.findFirst({
         where: { patientId: patient.id, active: true },
@@ -162,6 +167,7 @@ export class WahaWebhookService {
           consentAt: new Date(),
         },
       });
+      this.logger.log(`Consent: opted_in for patientId=${patientId}`);
 
       const template = await this.prisma.templateMessage.findUnique({
         where: { key: "optin_confirm" },
@@ -186,6 +192,7 @@ export class WahaWebhookService {
           consentAt: new Date(),
         },
       });
+      this.logger.log(`Consent: opted_out for patientId=${patientId}`);
 
       const template = await this.prisma.templateMessage.findUnique({
         where: { key: "usage_hint" },

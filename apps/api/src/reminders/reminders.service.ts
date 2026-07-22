@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
 import { renderTemplate } from "@kawalgula/shared";
@@ -6,6 +6,8 @@ import { DateTime } from "luxon";
 
 @Injectable()
 export class RemindersService {
+  private readonly logger = new Logger(RemindersService.name);
+
   constructor(
     private prisma: PrismaService,
     private waha: WahaClientService,
@@ -100,6 +102,7 @@ export class RemindersService {
 
       try {
         const wahaMessageId = await this.waha.sendText(chatId, text);
+        this.logger.log(`Reminder sent to ${reminder.patient.name} for ${reminder.patientMedication.medication.name}`);
 
         await this.prisma.reminder.update({
           where: { id: reminder.id },
@@ -121,6 +124,7 @@ export class RemindersService {
           },
         });
       } catch (error: any) {
+        this.logger.error(`Reminder failed for ${reminder.patient.name}: ${error.message}`);
         await this.prisma.reminder.update({
           where: { id: reminder.id },
           data: { status: "failed" },
@@ -142,6 +146,7 @@ export class RemindersService {
 
   async markMissed() {
     const now = new Date();
+    let missedCount = 0;
 
     const sentReminders = await this.prisma.reminder.findMany({
       where: { status: "sent" },
@@ -179,6 +184,12 @@ export class RemindersService {
           createdById: "SYSTEM",
         },
       });
+
+      missedCount++;
+    }
+
+    if (missedCount > 0) {
+      this.logger.log(`Missed marker: ${missedCount} reminders marked as missed`);
     }
   }
 

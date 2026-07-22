@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
@@ -12,6 +13,8 @@ import { renderTemplate } from "@kawalgula/shared";
 
 @Injectable()
 export class PatientsService {
+  private readonly logger = new Logger(PatientsService.name);
+
   constructor(
     private prisma: PrismaService,
     private waha: WahaClientService,
@@ -170,6 +173,7 @@ export class PatientsService {
     try {
       const text = `${template.title}\n\n${body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
       await this.waha.sendText(chatId, text);
+      this.logger.log(`Opt-in sent to ${name} (${waNumber})`);
 
       const lid = await this.waha.getLidByPhone(waNumber);
       if (lid) {
@@ -177,6 +181,7 @@ export class PatientsService {
           where: { id: patientId },
           data: { lid },
         });
+        this.logger.log(`LID stored for ${name}: ${lid}`);
       }
 
       await this.prisma.outboundMessage.create({
@@ -188,7 +193,8 @@ export class PatientsService {
           createdById: "SYSTEM",
         },
       });
-    } catch {
+    } catch (error: any) {
+      this.logger.error(`Opt-in send failed for ${name}: ${error.message}`);
       await this.prisma.outboundMessage.create({
         data: {
           patientId,
