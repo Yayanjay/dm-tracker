@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
     env_file: .env
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:3011:3000"
     volumes:
       - ./.sessions:/app/.sessions
 
@@ -50,7 +50,7 @@ services:
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3010:3000"
     env_file: .env
     depends_on:
       postgres:
