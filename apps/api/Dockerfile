@@ -34,8 +34,8 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10 --activate
 
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
-COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
+COPY --from=builder /app/packages/shared/dist ./node_modules/@dm-tracker/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@dm-tracker/shared/package.json
 COPY --from=builder /app/packages/prisma ./packages/prisma
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/entrypoint.sh ./apps/api/entrypoint.sh
