@@ -2,7 +2,7 @@ import { Controller, Post, Get, Patch, Body, Param, UseGuards } from "@nestjs/co
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { TemplatesService } from "./templates.service";
 import { UpdateTemplateDto } from "./dto/update-template.dto";
-import { PaginationRequest, TemplateVariables } from "@dm-tracker/shared";
+import { PaginationRequest, TemplateVariables } from "@kawalgula/shared";
 
 @Controller("templates")
 @UseGuards(JwtAuthGuard)

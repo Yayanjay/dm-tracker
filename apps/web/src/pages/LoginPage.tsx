@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
-import type { LoginResponse, ApiResponse } from "@dm-tracker/shared";
+import type { LoginResponse, ApiResponse } from "@kawalgula/shared";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40">
       <div className="w-full max-w-sm space-y-6 rounded-lg border bg-card p-8 shadow-sm">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">DM Tracker</h1>
+          <h1 className="text-2xl font-bold">KawalGula</h1>
           <p className="text-sm text-muted-foreground">
             Silakan login untuk melanjutkan
           </p>

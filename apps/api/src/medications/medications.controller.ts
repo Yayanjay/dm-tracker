@@ -3,7 +3,7 @@ import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { MedicationsService } from "./medications.service";
 import { CreateMedicationDto } from "./dto/create-medication.dto";
 import { UpdateMedicationDto } from "./dto/update-medication.dto";
-import { PaginationRequest } from "@dm-tracker/shared";
+import { PaginationRequest } from "@kawalgula/shared";
 
 @Controller("medications")
 @UseGuards(JwtAuthGuard)

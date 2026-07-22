@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { PaginationRequest } from "@dm-tracker/shared";
+import { PaginationRequest } from "@kawalgula/shared";
 
 @Injectable()
 export class ConsumptionService {

@@ -7,8 +7,8 @@ import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
 import { CreatePatientDto } from "./dto/create-patient.dto";
 import { UpdatePatientDto } from "./dto/update-patient.dto";
-import { PaginationRequest } from "@dm-tracker/shared";
-import { renderTemplate } from "@dm-tracker/shared";
+import { PaginationRequest } from "@kawalgula/shared";
+import { renderTemplate } from "@kawalgula/shared";
 
 @Injectable()
 export class PatientsService {

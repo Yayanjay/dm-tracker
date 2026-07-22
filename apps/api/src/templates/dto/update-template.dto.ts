@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsArray, IsEnum } from "class-validator";
-import { TemplateType } from "@dm-tracker/shared";
+import { TemplateType } from "@kawalgula/shared";
 
 export class UpdateTemplateDto {
   @IsString()

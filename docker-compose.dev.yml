@@ -7,7 +7,7 @@ services:
       - .:/app
       - /app/node_modules
     environment:
-      DATABASE_URL: postgresql://dm_tracker:dm_tracker_pass@postgres:5432/dm_tracker?schema=public
+      DATABASE_URL: postgresql://kawalgula:kawalgula_pass@postgres:5432/kawalgula?schema=public
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-secret-not-for-production
       JWT_ACCESS_EXPIRES: 24h
@@ -27,7 +27,7 @@ services:
   web:
     image: node:20-alpine
     working_dir: /app
-    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && pnpm install --frozen-lockfile=false && pnpm --filter @dm-tracker/web dev"
+    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && pnpm install --frozen-lockfile=false && pnpm --filter @kawalgula/web dev"
     ports:
       - "5173:5173"
     volumes:

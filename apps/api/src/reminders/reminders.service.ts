@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
-import { renderTemplate } from "@dm-tracker/shared";
+import { renderTemplate } from "@kawalgula/shared";
 import { DateTime } from "luxon";
 
 @Injectable()

@@ -1,14 +1,14 @@
 {
-  "name": "dm-tracker",
+  "name": "kawalgula",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @dm-tracker/shared build && concurrently \"pnpm --filter @dm-tracker/api dev\" \"pnpm --filter @dm-tracker/web dev\"",
-    "build": "pnpm --filter @dm-tracker/shared build && pnpm --filter @dm-tracker/api build && pnpm --filter @dm-tracker/web build",
-    "lint": "pnpm --filter @dm-tracker/api lint && pnpm --filter @dm-tracker/web lint",
-    "prisma:generate": "pnpm --filter @dm-tracker/prisma generate",
-    "prisma:migrate": "pnpm --filter @dm-tracker/prisma migrate",
-    "prisma:push": "pnpm --filter @dm-tracker/prisma push",
-    "prisma:seed": "pnpm --filter @dm-tracker/prisma seed",
+    "dev": "pnpm --filter @kawalgula/shared build && concurrently \"pnpm --filter @kawalgula/api dev\" \"pnpm --filter @kawalgula/web dev\"",
+    "build": "pnpm --filter @kawalgula/shared build && pnpm --filter @kawalgula/api build && pnpm --filter @kawalgula/web build",
+    "lint": "pnpm --filter @kawalgula/api lint && pnpm --filter @kawalgula/web lint",
+    "prisma:generate": "pnpm --filter @kawalgula/prisma generate",
+    "prisma:migrate": "pnpm --filter @kawalgula/prisma migrate",
+    "prisma:push": "pnpm --filter @kawalgula/prisma push",
+    "prisma:seed": "pnpm --filter @kawalgula/prisma seed",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:build": "docker compose build"

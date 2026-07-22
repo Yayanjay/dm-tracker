@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreatePatientMedicationDto } from "./dto/create-patient-medication.dto";
 import { UpdatePatientMedicationDto } from "./dto/update-patient-medication.dto";
-import { PaginationRequest } from "@dm-tracker/shared";
+import { PaginationRequest } from "@kawalgula/shared";
 
 @Injectable()
 export class PatientMedicationsService {

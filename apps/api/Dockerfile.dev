@@ -6,4 +6,4 @@ RUN corepack enable && corepack prepare pnpm@10 --activate
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "pnpm --filter @dm-tracker/prisma generate && pnpm dev"]
+CMD ["sh", "-c", "pnpm --filter @kawalgula/prisma generate && pnpm dev"]

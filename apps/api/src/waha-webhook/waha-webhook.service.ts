@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
 import { WhatsappSessionService } from "../whatsapp-session/whatsapp-session.service";
-import { renderTemplate } from "@dm-tracker/shared";
+import { renderTemplate } from "@kawalgula/shared";
 
 const TAKEN_REGEX = /sudah|selesai|udah|minum/i;
 const SKIPPED_REGEX = /belum|lewati|skip/i;

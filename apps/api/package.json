@@ -1,5 +1,5 @@
 {
-  "name": "@dm-tracker/api",
+  "name": "@kawalgula/api",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@dm-tracker/prisma": "workspace:*",
-    "@dm-tracker/shared": "workspace:*",
+    "@kawalgula/prisma": "workspace:*",
+    "@kawalgula/shared": "workspace:*",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.0",

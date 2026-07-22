@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LoginRequest, LoginResponse } from "@dm-tracker/shared";
+import { LoginRequest, LoginResponse } from "@kawalgula/shared";
 
 @Controller("auth")
 export class AuthController {

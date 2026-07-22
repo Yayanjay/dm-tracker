@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateTemplateDto } from "./dto/update-template.dto";
-import { PaginationRequest, TemplateVariables } from "@dm-tracker/shared";
-import { renderTemplate } from "@dm-tracker/shared";
+import { PaginationRequest, TemplateVariables } from "@kawalgula/shared";
+import { renderTemplate } from "@kawalgula/shared";
 
 @Injectable()
 export class TemplatesService {

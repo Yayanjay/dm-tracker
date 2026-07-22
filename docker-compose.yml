@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: dm_tracker
-      POSTGRES_PASSWORD: dm_tracker_pass
-      POSTGRES_DB: dm_tracker
+      POSTGRES_USER: kawalgula
+      POSTGRES_PASSWORD: kawalgula_pass
+      POSTGRES_DB: kawalgula
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dm_tracker"]
+      test: ["CMD-SHELL", "pg_isready -U kawalgula"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://dm_tracker:dm_tracker_pass@postgres:5432/dm_tracker?schema=public
+      DATABASE_URL: postgresql://kawalgula:kawalgula_pass@postgres:5432/kawalgula?schema=public
       REDIS_URL: redis://redis:6379
     ports:
       - "127.0.0.1:3011:3000"

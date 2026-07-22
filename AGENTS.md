@@ -1,6 +1,6 @@
-# AGENTS.md — dm-tracker
+# AGENTS.md — kawalgula
 
-Puskesmas DM (diabetes mellitus) medication reminder + consumption tracking system. Admins use a web dashboard; patients interact via WhatsApp. Greenfield repo.
+Puskesmas diabetes mellitus (DM) medication reminder + consumption tracking system. Admins use a web dashboard; patients interact via WhatsApp. Greenfield repo.
 
 ## Before you start
 - Read `docs/architecture/REQUIREMENTS.md` and `docs/architecture/PLANS.md` before making any architectural decisions.

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards, Res } from "@nestjs/common";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { ConsumptionService } from "./consumption.service";
-import { PaginationRequest } from "@dm-tracker/shared";
+import { PaginationRequest } from "@kawalgula/shared";
 import { Response } from "express";
 
 @Controller("consumption")

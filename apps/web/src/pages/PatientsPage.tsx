@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
 import { useToast } from "../lib/toast";
-import type { PaginationResponse } from "@dm-tracker/shared";
+import type { PaginationResponse } from "@kawalgula/shared";
 import { UserPlus, Send, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Patient {

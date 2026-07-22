@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
 import { useToast } from "../lib/toast";
-import type { PaginationResponse } from "@dm-tracker/shared";
+import type { PaginationResponse } from "@kawalgula/shared";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ConsumptionRow {

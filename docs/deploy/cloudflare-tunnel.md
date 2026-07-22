@@ -14,7 +14,7 @@ In Cloudflare Dashboard → DNS, create a CNAME record:
 ## 2. Cloudflare Tunnel (Dashboard method)
 1. Go to Cloudflare Dashboard → Zero Trust → Networks → Tunnels
 2. Click "Create a tunnel"
-3. Name: `dm-tracker`
+3. Name: `kawalgula`
 4. Install connector: follow the dashboard instructions to install `cloudflared` as a service on your homelab host
 5. After the connector is running, add a Public Hostname:
    - Subdomain: `dm` (match the DNS record)
