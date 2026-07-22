@@ -28,7 +28,9 @@ export class ConsumptionService {
           }
           if (k === "medicationName") {
             where.OR.push({
-              medication: { name: { contains: search.value, mode: "insensitive" } },
+              patientMedication: {
+                medication: { name: { contains: search.value, mode: "insensitive" } },
+              },
             });
           }
         }
@@ -53,7 +55,9 @@ export class ConsumptionService {
         orderBy,
         include: {
           patient: { select: { name: true, waNumber: true } },
-          medication: { select: { name: true } },
+          patientMedication: {
+            include: { medication: { select: { name: true } } },
+          },
         },
       }),
       this.prisma.consumptionLog.count({ where }),
@@ -71,11 +75,7 @@ export class ConsumptionService {
   }
 
   async exportCsv(dto: PaginationRequest & { patientId?: string }) {
-    const { data: rows } = await this.list({
-      ...dto,
-      page: 1,
-      size: 10000,
-    });
+    const { data: rows } = await this.list({ ...dto, page: 1, size: 10000 });
 
     let csv = "Tanggal,Nama Pasien,WA Number,Nama Obat,Status,Sumber\n";
 
@@ -83,7 +83,8 @@ export class ConsumptionService {
       const date = new Date(row.reportedAt).toLocaleString("id-ID", {
         timeZone: "Asia/Jakarta",
       });
-      csv += `${date},${row.patient.name},${row.patient.waNumber},${row.medication.name},${row.status},${row.source}\n`;
+      const medName = row.patientMedication?.medication?.name ?? "-";
+      csv += `${date},${row.patient.name},${row.patient.waNumber},${medName},${row.status},${row.source}\n`;
     }
 
     return csv;

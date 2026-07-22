@@ -10,7 +10,7 @@ interface Patient {
   name: string;
   waNumber: string;
   consentStatus: string;
-  _count: { medications: number };
+  _count: { patientMedications: number };
 }
 
 export default function PatientsPage() {
@@ -136,7 +136,7 @@ export default function PatientsPage() {
                 <td className="px-4 py-3 font-medium cursor-pointer" onClick={() => navigate(`/patients/${p.id}/medications`)}>{p.name}</td>
                 <td className="px-4 py-3">{p.waNumber}</td>
                 <td className="px-4 py-3">{consentBadge(p.consentStatus)}</td>
-                <td className="px-4 py-3">{p._count.medications}</td>
+                <td className="px-4 py-3">{p._count.patientMedications}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
                     {(p.consentStatus === "pending" || p.consentStatus === "opted_out") && (

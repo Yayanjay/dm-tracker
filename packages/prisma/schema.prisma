@@ -84,11 +84,11 @@ model Patient {
   updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at")
   createdById   String        @map("created_by_id")
 
-  createdBy Admin          @relation(fields: [createdById], references: [id])
-  medications Medication[]
-  reminders   Reminder[]
-  consumptionLogs ConsumptionLog[]
-  outboundMessages OutboundMessage[]
+  createdBy          Admin              @relation(fields: [createdById], references: [id])
+  patientMedications PatientMedication[]
+  reminders          Reminder[]
+  consumptionLogs    ConsumptionLog[]
+  outboundMessages   OutboundMessage[]
 
   @@index([consentStatus])
   @@index([active])
@@ -96,66 +96,80 @@ model Patient {
 }
 
 model Medication {
-  id           String   @id @default(cuid())
-  patientId    String   @map("patient_id")
-  name         String
-  dosage       String
-  unit         String
-  scheduleTimes String[] @map("schedule_times")
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
-  createdById  String   @default("") @map("created_by_id")
+  id          String   @id @default(cuid())
+  name        String
+  dosage      String
+  unit        String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  createdById String   @map("created_by_id")
 
-  patient    Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  reminders   Reminder[]
-  consumptionLogs ConsumptionLog[]
+  patientMedications PatientMedication[]
 
-  @@index([patientId])
   @@map("medications")
 }
 
-model Reminder {
-  id           String         @id @default(cuid())
-  patientId    String         @map("patient_id")
-  medicationId String         @map("medication_id")
-  scheduledAt  DateTime       @map("scheduled_at")
-  status       ReminderStatus @default(pending)
-  sentAt       DateTime?      @map("sent_at")
-  wahaMessageId String?       @map("waha_message_id")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at")
-  createdById   String        @default("SYSTEM") @map("created_by_id")
+model PatientMedication {
+  id            String   @id @default(cuid())
+  patientId     String   @map("patient_id")
+  medicationId  String   @map("medication_id")
+  scheduleTimes String[] @map("schedule_times")
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+  createdById   String   @map("created_by_id")
 
-  patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  patient         Patient          @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medication      Medication       @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  reminders       Reminder[]
   consumptionLogs ConsumptionLog[]
 
+  @@index([patientId])
+  @@index([medicationId])
+  @@map("patient_medications")
+}
+
+model Reminder {
+  id                  String         @id @default(cuid())
+  patientId           String         @map("patient_id")
+  patientMedicationId String         @map("patient_medication_id")
+  scheduledAt         DateTime       @map("scheduled_at")
+  status              ReminderStatus @default(pending)
+  sentAt              DateTime?      @map("sent_at")
+  wahaMessageId       String?        @map("waha_message_id")
+  createdAt           DateTime       @default(now()) @map("created_at")
+  updatedAt           DateTime       @default(now()) @updatedAt @map("updated_at")
+  createdById         String         @default("SYSTEM") @map("created_by_id")
+
+  patient          Patient          @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientMedication PatientMedication @relation(fields: [patientMedicationId], references: [id], onDelete: Cascade)
+  consumptionLogs  ConsumptionLog[]
+
   @@index([patientId, scheduledAt, status])
-  @@index([medicationId, scheduledAt])
+  @@index([patientMedicationId, scheduledAt])
   @@index([status])
   @@map("reminders")
 }
 
 model ConsumptionLog {
-  id           String            @id @default(cuid())
-  patientId    String            @map("patient_id")
-  medicationId String            @map("medication_id")
-  reminderId   String?           @map("reminder_id")
-  status       ConsumptionStatus
-  source       ConsumptionSource
-  rawText      String?           @map("raw_text")
-  reportedAt   DateTime          @default(now()) @map("reported_at")
-  createdAt    DateTime          @default(now()) @map("created_at")
-  updatedAt    DateTime          @default(now()) @updatedAt @map("updated_at")
-  createdById  String            @default("SYSTEM") @map("created_by_id")
+  id                  String            @id @default(cuid())
+  patientId           String            @map("patient_id")
+  patientMedicationId String?           @map("patient_medication_id")
+  reminderId          String?           @map("reminder_id")
+  status              ConsumptionStatus
+  source              ConsumptionSource
+  rawText             String?           @map("raw_text")
+  reportedAt          DateTime          @default(now()) @map("reported_at")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at")
+  createdById         String            @default("SYSTEM") @map("created_by_id")
 
-  patient    Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
-  reminder   Reminder?  @relation(fields: [reminderId], references: [id])
+  patient          Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientMedication PatientMedication? @relation(fields: [patientMedicationId], references: [id], onDelete: SetNull)
+  reminder         Reminder?         @relation(fields: [reminderId], references: [id])
 
   @@index([patientId])
-  @@index([medicationId])
+  @@index([patientMedicationId])
   @@index([reminderId])
   @@map("consumption_logs")
 }
@@ -175,16 +189,16 @@ model TemplateMessage {
 }
 
 model OutboundMessage {
-  id           String         @id @default(cuid())
-  patientId    String         @map("patient_id")
-  kind         OutboundKind
-  payload      Json
-  wahaMessageId String?       @map("waha_message_id")
-  status       OutboundStatus @default(pending)
-  error        String?
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at")
-  createdById  String         @default("SYSTEM") @map("created_by_id")
+  id            String         @id @default(cuid())
+  patientId     String         @map("patient_id")
+  kind          OutboundKind
+  payload       Json
+  wahaMessageId String?        @map("waha_message_id")
+  status        OutboundStatus @default(pending)
+  error         String?
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
+  createdById   String         @default("SYSTEM") @map("created_by_id")
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 

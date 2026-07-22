@@ -92,7 +92,7 @@ export class WahaWebhookService {
       await this.prisma.consumptionLog.create({
         data: {
           patientId: patient.id,
-          medicationId: recentReminder.medicationId,
+          patientMedicationId: recentReminder.patientMedicationId,
           reminderId: recentReminder.id,
           status,
           source,
@@ -101,16 +101,16 @@ export class WahaWebhookService {
         },
       });
     } else {
-      const medication = await this.prisma.medication.findFirst({
+      const assignment = await this.prisma.patientMedication.findFirst({
         where: { patientId: patient.id, active: true },
         orderBy: { createdAt: "desc" },
       });
 
-      if (medication) {
+      if (assignment) {
         await this.prisma.consumptionLog.create({
           data: {
             patientId: patient.id,
-            medicationId: medication.id,
+            patientMedicationId: assignment.id,
             status,
             source,
             rawText: buttonText || body || null,

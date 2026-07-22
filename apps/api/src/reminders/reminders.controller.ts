@@ -12,11 +12,11 @@ export class RemindersController {
   ) {}
 
   @Post("send-now")
-  async sendNow(@Body("medicationId") medicationId?: string) {
+  async sendNow(@Body("patientMedicationId") patientMedicationId?: string) {
     if (this.config.get<string>("ENABLE_MANUAL_REMINDER") !== "true") {
       throw new ForbiddenException("Manual reminder is disabled");
     }
-    await this.remindersService.dispatchReminders(medicationId);
+    await this.remindersService.dispatchReminders(patientMedicationId);
     return { data: { message: "Pengingat dikirim" } };
   }
 }

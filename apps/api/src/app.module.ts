@@ -8,6 +8,7 @@ import { WhatsappSessionModule } from "./whatsapp-session/whatsapp-session.modul
 import { TemplatesModule } from "./templates/templates.module";
 import { PatientsModule } from "./patients/patients.module";
 import { MedicationsModule } from "./medications/medications.module";
+import { PatientMedicationsModule } from "./patient-medications/patient-medications.module";
 import { QueueModule } from "./queue/queue.module";
 import { RemindersModule } from "./reminders/reminders.module";
 import { WahaWebhookModule } from "./waha-webhook/waha-webhook.module";
@@ -39,6 +40,7 @@ import { join } from "path";
     TemplatesModule,
     PatientsModule,
     MedicationsModule,
+    PatientMedicationsModule,
     QueueModule,
     RemindersModule,
     WahaWebhookModule,

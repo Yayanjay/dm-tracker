@@ -4,11 +4,16 @@ import api from "../lib/api";
 import { useToast } from "../lib/toast";
 import { Plus, Trash2, Bell } from "lucide-react";
 
-interface Medication {
+interface MasterMedication {
   id: string;
   name: string;
   dosage: string;
   unit: string;
+}
+
+interface Assignment {
+  id: string;
+  medication: MasterMedication;
   scheduleTimes: string[];
   active: boolean;
 }
@@ -22,17 +27,23 @@ export default function PatientMedicationsPage() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [patient, setPatient] = useState<Patient | null>(null);
-  const [meds, setMeds] = useState<Medication[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<Medication | null>(null);
-  const [form, setForm] = useState({ name: "", dosage: "", unit: "", scheduleTimes: "" });
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [masterMeds, setMasterMeds] = useState<MasterMedication[]>([]);
+  const [selectedMedId, setSelectedMedId] = useState("");
+  const [scheduleInput, setScheduleInput] = useState("");
+  const [editing, setEditing] = useState<Assignment | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchData = async () => {
     try {
-      const { data } = await api.get(`/patients/${id}`);
-      setPatient(data.data);
-      setMeds(data.data.medications || []);
+      const [patientRes, assignRes, masterRes] = await Promise.all([
+        api.get(`/patients/${id}`),
+        api.post("/patient-medications/list", { page: 1, size: 50, patientId: id }),
+        api.post("/medications/list", { page: 1, size: 200 }),
+      ]);
+      setPatient(patientRes.data.data);
+      setAssignments(assignRes.data.data);
+      setMasterMeds(masterRes.data.data);
     } catch {
       // ignore
     }
@@ -40,51 +51,57 @@ export default function PatientMedicationsPage() {
 
   useEffect(() => { fetchData(); }, [id]);
 
-  const openCreate = () => {
+  const resetForm = () => {
+    setSelectedMedId("");
+    setScheduleInput("");
     setEditing(null);
-    setForm({ name: "", dosage: "", unit: "", scheduleTimes: "" });
-    setShowModal(true);
-  };
-
-  const openEdit = (m: Medication) => {
-    setEditing(m);
-    setForm({ name: m.name, dosage: m.dosage, unit: m.unit, scheduleTimes: m.scheduleTimes.join(", ") });
-    setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedMedId) return;
     setSubmitting(true);
-    const times = form.scheduleTimes.split(",").map((t) => t.trim()).filter(Boolean);
+    const times = scheduleInput.split(",").map((t) => t.trim()).filter(Boolean);
     try {
       if (editing) {
-        await api.patch(`/medications/${editing.id}`, { name: form.name, dosage: form.dosage, unit: form.unit, scheduleTimes: times, active: true });
+        await api.patch(`/patient-medications/${editing.id}`, { scheduleTimes: times });
+        toast("Jadwal diperbarui");
       } else {
-        await api.post("/medications", { patientId: id, name: form.name, dosage: form.dosage, unit: form.unit, scheduleTimes: times });
+        await api.post("/patient-medications", { patientId: id, medicationId: selectedMedId, scheduleTimes: times });
+        toast("Obat ditambahkan");
       }
-      setShowModal(false);
+      resetForm();
       fetchData();
-      toast(editing ? "Obat berhasil diperbarui" : "Obat berhasil ditambahkan");
     } catch (err: any) {
       toast(err.response?.data?.message || "Gagal", "error");
     }
     setSubmitting(false);
   };
 
-  const handleDeactivate = async (medId: string) => {
-    if (!confirm("Nonaktifkan obat ini?")) return;
-    await api.patch(`/medications/${medId}`, { active: false });
-    fetchData();
-    toast("Obat dinonaktifkan");
+  const handleDelete = async (assignmentId: string) => {
+    if (!confirm("Hapus obat ini? Pengingat akan dihapus, log konsumsi tetap tersimpan.")) return;
+    try {
+      await api.delete(`/patient-medications/${assignmentId}`);
+      fetchData();
+      toast("Obat dihapus");
+    } catch (err: any) {
+      toast(err.response?.data?.message || "Gagal", "error");
+    }
   };
 
-  const handleSendNow = async (medicationId: string) => {
+  const handleSendNow = async (assignmentId: string) => {
     try {
-      await api.post("/reminders/send-now", { medicationId });
+      await api.post("/reminders/send-now", { patientMedicationId: assignmentId });
       toast("Pengingat dikirim");
     } catch (err: any) {
       toast(err.response?.data?.message || "Gagal", "error");
     }
+  };
+
+  const handleEdit = (a: Assignment) => {
+    setEditing(a);
+    setSelectedMedId(a.medication.id);
+    setScheduleInput(a.scheduleTimes.join(", "));
   };
 
   return (
@@ -92,81 +109,78 @@ export default function PatientMedicationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold">Obat {patient?.name || "..."}</h2>
-          <p className="text-sm text-muted-foreground">Kelola jadwal pengobatan</p>
+          <p className="text-sm text-muted-foreground">Pilih obat dari daftar dan atur jadwal</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          <Plus className="h-4 w-4" /> Tambah Obat
-        </button>
       </div>
 
+      <form onSubmit={handleSubmit} className="flex items-end gap-3 rounded-lg border p-4">
+        <div className="flex-1">
+          <label className="text-sm font-medium">Obat</label>
+          <select
+            value={selectedMedId}
+            onChange={(e) => setSelectedMedId(e.target.value)}
+            className="w-full rounded-md border px-3 py-2 text-sm"
+            disabled={!!editing}
+          >
+            <option value="">-- Pilih Obat --</option>
+            {masterMeds.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name} {m.dosage} {m.unit}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1">
+          <label className="text-sm font-medium">Jadwal WIB (pisahkan dengan koma)</label>
+          <input
+            type="text"
+            value={scheduleInput}
+            onChange={(e) => setScheduleInput(e.target.value)}
+            className="w-full rounded-md border px-3 py-2 text-sm"
+            placeholder="08:00, 20:00"
+            required
+          />
+        </div>
+        <div className="flex gap-2">
+          {editing && (
+            <button type="button" onClick={resetForm} className="rounded-md border px-4 py-2 text-sm">
+              Batal
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={submitting || !selectedMedId}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          >
+            {submitting ? "..." : editing ? "Simpan" : "Tambah"}
+          </button>
+        </div>
+      </form>
+
       <div className="space-y-3">
-        {meds.filter((m) => m.active).length === 0 && (
+        {assignments.filter((a) => a.active).length === 0 && (
           <p className="text-sm text-muted-foreground">Belum ada obat</p>
         )}
-        {meds.filter((m) => m.active).map((m) => (
-          <div key={m.id} className="flex items-start justify-between rounded-lg border p-4">
+        {assignments.filter((a) => a.active).map((a) => (
+          <div key={a.id} className="flex items-start justify-between rounded-lg border p-4">
             <div>
-              <p className="font-medium">{m.name} {m.dosage} {m.unit}</p>
+              <p className="font-medium">{a.medication.name} {a.medication.dosage} {a.medication.unit}</p>
               <p className="text-sm text-muted-foreground">
-                Jadwal: {m.scheduleTimes.join(", ")} WIB
+                Jadwal: {a.scheduleTimes.join(", ")} WIB
               </p>
             </div>
             <div className="flex gap-1">
-              <button onClick={() => handleSendNow(m.id)} className="rounded p-1 hover:bg-muted" title="Kirim pengingat sekarang">
+              <button onClick={() => handleSendNow(a.id)} className="rounded p-1 hover:bg-muted" title="Kirim pengingat">
                 <Bell className="h-4 w-4" />
               </button>
-              <button onClick={() => openEdit(m)} className="rounded p-1 hover:bg-muted text-sm">Edit</button>
-              <button onClick={() => handleDeactivate(m.id)} className="rounded p-1 hover:bg-muted text-red-500">
+              <button onClick={() => handleEdit(a)} className="rounded p-1 hover:bg-muted text-sm">Edit</button>
+              <button onClick={() => handleDelete(a.id)} className="rounded p-1 hover:bg-muted text-red-500">
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
           </div>
         ))}
-        {meds.filter((m) => !m.active).length > 0 && (
-          <details className="text-sm text-muted-foreground">
-            <summary className="cursor-pointer">Nonaktif ({meds.filter((m) => !m.active).length})</summary>
-            {meds.filter((m) => !m.active).map((m) => (
-              <div key={m.id} className="mt-2 rounded border p-2 opacity-60">
-                {m.name} {m.dosage} {m.unit}
-              </div>
-            ))}
-          </details>
-        )}
       </div>
-
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowModal(false)}>
-          <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-4">{editing ? "Edit Obat" : "Tambah Obat"}</h3>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="text-sm font-medium">Nama Obat</label>
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded-md border px-3 py-2 text-sm" placeholder="Metformin" required />
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="text-sm font-medium">Dosis</label>
-                  <input type="text" value={form.dosage} onChange={(e) => setForm({ ...form, dosage: e.target.value })} className="w-full rounded-md border px-3 py-2 text-sm" placeholder="500mg" required />
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium">Satuan</label>
-                  <input type="text" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} className="w-full rounded-md border px-3 py-2 text-sm" placeholder="tablet" required />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Jadwal (pisahkan dengan koma)</label>
-                <input type="text" value={form.scheduleTimes} onChange={(e) => setForm({ ...form, scheduleTimes: e.target.value })} className="w-full rounded-md border px-3 py-2 text-sm" placeholder="08:00, 20:00" required />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 rounded-md border px-4 py-2 text-sm">Batal</button>
-                <button type="submit" disabled={submitting} className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">
-                  {submitting ? "Menyimpan..." : editing ? "Simpan" : "Tambah"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

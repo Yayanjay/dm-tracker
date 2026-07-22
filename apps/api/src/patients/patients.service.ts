@@ -59,7 +59,7 @@ export class PatientsService {
           consentAt: true,
           active: true,
           createdAt: true,
-          _count: { select: { medications: true } },
+          _count: { select: { patientMedications: true } },
         },
       }),
       this.prisma.patient.count({ where }),
@@ -80,9 +80,10 @@ export class PatientsService {
     const patient = await this.prisma.patient.findFirst({
       where: { id, active: true },
       include: {
-        medications: {
+        patientMedications: {
           where: { active: true },
           orderBy: { createdAt: "asc" },
+          include: { medication: true },
         },
       },
     });

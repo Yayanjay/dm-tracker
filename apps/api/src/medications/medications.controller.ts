@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Body,
-  Param,
-  UseGuards,
-  Req,
-} from "@nestjs/common";
+import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Req } from "@nestjs/common";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { MedicationsService } from "./medications.service";
 import { CreateMedicationDto } from "./dto/create-medication.dto";
@@ -20,7 +11,7 @@ export class MedicationsController {
   constructor(private medicationsService: MedicationsService) {}
 
   @Post("list")
-  async list(@Body() dto: PaginationRequest & { patientId?: string }) {
+  async list(@Body() dto: PaginationRequest) {
     return this.medicationsService.list(dto);
   }
 
@@ -37,5 +28,11 @@ export class MedicationsController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateMedicationDto) {
     return this.medicationsService.update(id, dto);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string) {
+    await this.medicationsService.delete(id);
+    return { data: { message: "Obat dihapus" } };
   }
 }

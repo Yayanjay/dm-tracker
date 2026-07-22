@@ -20,15 +20,15 @@ export class RemindersService {
         active: true,
       },
       include: {
-        medications: {
+        patientMedications: {
           where: { active: true },
         },
       },
     });
 
     for (const patient of patients) {
-      for (const medication of patient.medications) {
-        for (const timeStr of medication.scheduleTimes) {
+      for (const pm of patient.patientMedications) {
+        for (const timeStr of pm.scheduleTimes) {
           const [hour, minute] = timeStr.split(":").map(Number);
 
           for (
@@ -38,7 +38,7 @@ export class RemindersService {
           ) {
             const exists = await this.prisma.reminder.findFirst({
               where: {
-                medicationId: medication.id,
+                patientMedicationId: pm.id,
                 scheduledAt: scheduled,
               },
             });
@@ -47,7 +47,7 @@ export class RemindersService {
               await this.prisma.reminder.create({
                 data: {
                   patientId: patient.id,
-                  medicationId: medication.id,
+                  patientMedicationId: pm.id,
                   scheduledAt: scheduled,
                   status: "pending",
                   createdById: "SYSTEM",
@@ -60,12 +60,12 @@ export class RemindersService {
     }
   }
 
-  async dispatchReminders(medicationId?: string) {
+  async dispatchReminders(patientMedicationId?: string) {
     const now = new Date();
 
     const where: any = { status: "pending" };
-    if (medicationId) {
-      where.medicationId = medicationId;
+    if (patientMedicationId) {
+      where.patientMedicationId = patientMedicationId;
     } else {
       where.scheduledAt = { lte: now };
     }
@@ -74,7 +74,9 @@ export class RemindersService {
       where,
       include: {
         patient: true,
-        medication: true,
+        patientMedication: {
+          include: { medication: true },
+        },
       },
       take: 50,
     });
@@ -89,9 +91,9 @@ export class RemindersService {
       const chatId = `${reminder.patient.waNumber}@c.us`;
       const body = renderTemplate(template.body, {
         name: reminder.patient.name,
-        medication_name: reminder.medication.name,
-        dosage: reminder.medication.dosage,
-        unit: reminder.medication.unit,
+        medication_name: reminder.patientMedication.medication.name,
+        dosage: reminder.patientMedication.medication.dosage,
+        unit: reminder.patientMedication.medication.unit,
       });
 
       const text = `${template.title}\n\n${body}\n\nBalas "sudah" jika sudah minum, "belum" jika belum.`;
@@ -143,7 +145,6 @@ export class RemindersService {
 
     const sentReminders = await this.prisma.reminder.findMany({
       where: { status: "sent" },
-      include: { medication: true },
     });
 
     for (const reminder of sentReminders) {
@@ -155,7 +156,7 @@ export class RemindersService {
 
       const nextReminder = await this.prisma.reminder.findFirst({
         where: {
-          medicationId: reminder.medicationId,
+          patientMedicationId: reminder.patientMedicationId,
           scheduledAt: { gt: reminder.scheduledAt },
         },
         orderBy: { scheduledAt: "asc" },
@@ -171,7 +172,7 @@ export class RemindersService {
       await this.prisma.consumptionLog.create({
         data: {
           patientId: reminder.patientId,
-          medicationId: reminder.medicationId,
+          patientMedicationId: reminder.patientMedicationId,
           reminderId: reminder.id,
           status: "missed",
           source: "system_missed",
