@@ -14,9 +14,8 @@ COPY apps/web/package.json ./apps/web/
 # at the root for Prisma's default generator output resolution.
 RUN pnpm install --frozen-lockfile
 
-# Fail with an actionable error before running Prisma if the required hoist is absent.
-RUN test -f node_modules/@prisma/client/package.json \
- && test -f packages/prisma/node_modules/@prisma/client/package.json
+# Fail if @prisma/client was not hoisted (should be with node-linker=hoisted in .npmrc)
+RUN test -f node_modules/@prisma/client/package.json
 
 COPY packages/prisma ./packages/prisma
 COPY packages/shared ./packages/shared
