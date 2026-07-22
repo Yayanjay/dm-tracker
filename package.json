@@ -29,6 +29,7 @@
       "bcrypt",
       "esbuild",
       "msgpackr-extract"
-    ]
+    ],
+    "publicHoistPattern": ["@prisma/client"]
   }
 }
