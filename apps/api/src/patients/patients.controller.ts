@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -42,5 +43,11 @@ export class PatientsController {
   @Post(":id/resend-optin")
   async resendOptin(@Param("id") id: string) {
     return this.patientsService.resendOptin(id);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string) {
+    await this.patientsService.delete(id);
+    return { data: { message: "Pasien dihapus" } };
   }
 }

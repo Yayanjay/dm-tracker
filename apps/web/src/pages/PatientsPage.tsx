@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
 import { useToast } from "../lib/toast";
 import type { PaginationResponse } from "@kawalgula/shared";
-import { UserPlus, Send, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { UserPlus, Send, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Patient {
   id: string;
@@ -81,6 +81,17 @@ export default function PatientsPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Hapus pasien ini? Log konsumsi tetap tersimpan.")) return;
+    try {
+      await api.delete(`/patients/${id}`);
+      fetchPatients();
+      toast("Pasien dihapus");
+    } catch (err: any) {
+      toast(err.response?.data?.message || "Gagal", "error");
+    }
+  };
+
   const consentBadge = (status: string) => {
     const map: Record<string, string> = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -146,6 +157,9 @@ export default function PatientsPage() {
                     )}
                     <button onClick={() => openEdit(p)} className="rounded p-1 hover:bg-muted" title="Edit">
                       <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => handleDelete(p.id)} className="rounded p-1 hover:bg-muted text-red-500" title="Hapus">
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </td>

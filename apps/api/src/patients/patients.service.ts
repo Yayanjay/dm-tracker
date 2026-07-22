@@ -160,6 +160,12 @@ export class PatientsService {
     return { data: null };
   }
 
+  async delete(id: string) {
+    const patient = await this.prisma.patient.findUnique({ where: { id } });
+    if (!patient) throw new NotFoundException("Pasien tidak ditemukan");
+    await this.prisma.patient.delete({ where: { id } });
+  }
+
   private async sendOptIn(patientId: string, name: string, waNumber: string) {
     const template = await this.prisma.templateMessage.findUnique({
       where: { key: "enrollment" },

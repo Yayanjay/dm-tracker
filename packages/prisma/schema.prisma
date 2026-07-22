@@ -154,7 +154,7 @@ model Reminder {
 
 model ConsumptionLog {
   id                  String            @id @default(cuid())
-  patientId           String            @map("patient_id")
+  patientId           String?           @map("patient_id")
   patientMedicationId String?           @map("patient_medication_id")
   reminderId          String?           @map("reminder_id")
   status              ConsumptionStatus
@@ -165,7 +165,7 @@ model ConsumptionLog {
   updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at")
   createdById         String            @default("SYSTEM") @map("created_by_id")
 
-  patient          Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patient          Patient?          @relation(fields: [patientId], references: [id], onDelete: SetNull)
   patientMedication PatientMedication? @relation(fields: [patientMedicationId], references: [id], onDelete: SetNull)
   reminder         Reminder?         @relation(fields: [reminderId], references: [id])
 
