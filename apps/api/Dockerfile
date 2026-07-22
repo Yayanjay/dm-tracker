@@ -4,13 +4,19 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@10 --activate
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY packages/prisma/package.json ./packages/prisma/
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 
-RUN pnpm install --frozen-lockfile=false
+# Use the committed dependency graph; .npmrc above makes @prisma/client available
+# at the root for Prisma's default generator output resolution.
+RUN pnpm install --frozen-lockfile
+
+# Fail with an actionable error before running Prisma if the required hoist is absent.
+RUN test -f node_modules/@prisma/client/package.json \
+ && test -f packages/prisma/node_modules/@prisma/client/package.json
 
 COPY packages/prisma ./packages/prisma
 COPY packages/shared ./packages/shared

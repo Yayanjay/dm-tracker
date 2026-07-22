@@ -1,4 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
-allowBuild: '@prisma/client,@prisma/engines,prisma,bcrypt,esbuild,msgpackr-extract'
+
+# pnpm v10 reads lifecycle-script allowlists from the workspace config.
+# Prisma's postinstall downloads its engines and prepares the client package.
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "prisma"
+  - "bcrypt"
+  - "esbuild"
+  - "msgpackr-extract"
