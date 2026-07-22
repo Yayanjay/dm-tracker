@@ -9,6 +9,7 @@ export class WahaWebhookController {
   @Post()
   async receive(@Body() body: any, @Res() res: Response) {
     try {
+      console.log("WAHA webhook:", JSON.stringify(body));
       await this.wahaWebhookService.handleEvent(body);
     } catch {
       // always return 200 to WAHA regardless of internal errors
