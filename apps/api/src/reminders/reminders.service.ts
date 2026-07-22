@@ -63,12 +63,11 @@ export class RemindersService {
   async dispatchReminders(medicationId?: string) {
     const now = new Date();
 
-    const where: any = {
-      status: "pending",
-      scheduledAt: { lte: now },
-    };
+    const where: any = { status: "pending" };
     if (medicationId) {
       where.medicationId = medicationId;
+    } else {
+      where.scheduledAt = { lte: now };
     }
 
     const pending = await this.prisma.reminder.findMany({
