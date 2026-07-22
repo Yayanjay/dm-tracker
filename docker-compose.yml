@@ -39,6 +39,9 @@ services:
       - 1.1.1.1
     restart: unless-stopped
     env_file: .env
+    environment:
+      DATABASE_URL: postgresql://dm_tracker:dm_tracker_pass@postgres:5432/dm_tracker?schema=public
+      REDIS_URL: redis://redis:6379
     ports:
       - "127.0.0.1:3011:3000"
     volumes:
