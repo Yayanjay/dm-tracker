@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../lib/api";
 import { useToast } from "../lib/toast";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Bell } from "lucide-react";
 
 interface Medication {
   id: string;
@@ -78,6 +78,15 @@ export default function PatientMedicationsPage() {
     toast("Obat dinonaktifkan");
   };
 
+  const handleSendNow = async (medicationId: string) => {
+    try {
+      await api.post("/reminders/send-now", { medicationId });
+      toast("Pengingat dikirim");
+    } catch (err: any) {
+      toast(err.response?.data?.message || "Gagal", "error");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -103,6 +112,9 @@ export default function PatientMedicationsPage() {
               </p>
             </div>
             <div className="flex gap-1">
+              <button onClick={() => handleSendNow(m.id)} className="rounded p-1 hover:bg-muted" title="Kirim pengingat sekarang">
+                <Bell className="h-4 w-4" />
+              </button>
               <button onClick={() => openEdit(m)} className="rounded p-1 hover:bg-muted text-sm">Edit</button>
               <button onClick={() => handleDeactivate(m.id)} className="rounded p-1 hover:bg-muted text-red-500">
                 <Trash2 className="h-4 w-4" />
