@@ -14,38 +14,20 @@
     "docker:build": "docker compose build"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "@types/bcrypt": "^5.0.2",
+    "bcrypt": "^5.1.1",
+    "concurrently": "^9.1.0",
+    "prisma": "^6.2.0",
+    "tsx": "^4.19.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "-",
-      ",",
-      "@",
       "@prisma/client",
       "@prisma/engines",
-      "/",
-      "a",
-      "b",
-      "bcrypt",
-      "c",
-      "d",
-      "e",
-      "esbuild",
-      "g",
-      "i",
-      "k",
-      "l",
-      "m",
-      "msgpackr-extract",
-      "n",
-      "p",
       "prisma",
-      "r",
-      "s",
-      "t",
-      "u",
-      "x",
-      "y"
+      "bcrypt",
+      "esbuild",
+      "msgpackr-extract"
     ]
   }
 }

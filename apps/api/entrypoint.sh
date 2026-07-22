@@ -2,7 +2,7 @@
 set -e
 
 echo "Waiting for postgres..."
-until npx prisma db push --schema packages/prisma/schema.prisma --skip-generate 2>/dev/null; do
+until npx prisma db push --schema packages/prisma/schema.prisma --skip-generate 2>&1; do
   sleep 2
 done
 

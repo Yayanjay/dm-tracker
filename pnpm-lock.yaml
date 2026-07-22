@@ -8,9 +8,21 @@ importers:
 
   .:
     devDependencies:
+      '@types/bcrypt':
+        specifier: ^5.0.2
+        version: 5.0.2
+      bcrypt:
+        specifier: ^5.1.1
+        version: 5.1.1
       concurrently:
         specifier: ^9.1.0
         version: 9.2.4
+      prisma:
+        specifier: ^6.2.0
+        version: 6.19.3(typescript@5.9.3)
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.1
 
   apps/api:
     dependencies:
@@ -202,19 +214,7 @@ importers:
       '@prisma/client':
         specifier: ^6.2.0
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
     devDependencies:
-      '@types/bcrypt':
-        specifier: ^5.0.2
-        version: 5.0.2
-      prisma:
-        specifier: ^6.2.0
-        version: 6.19.3(typescript@5.9.3)
-      tsx:
-        specifier: ^4.19.0
-        version: 4.23.1
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
