@@ -39,15 +39,32 @@ export class WahaWebhookService {
   private async handleMessage(payload: any) {
     if (!payload?.from) return;
 
-    const waNumber = payload.from.replace("@c.us", "");
-    const patient = await this.prisma.patient.findUnique({
-      where: { waNumber, active: true },
-    });
+    const from = payload.from;
+    let patient: any = null;
+
+    if (from.includes("@lid")) {
+      const lid = from.replace("@lid", "");
+      patient = await this.prisma.patient.findFirst({ where: { lid, active: true } });
+    } else {
+      const waNumber = from.replace("@c.us", "");
+      patient = await this.prisma.patient.findUnique({ where: { waNumber, active: true } });
+    }
+
+    if (!patient) {
+      const lid = from.replace("@lid", "");
+      const phone = await this.waha.getPhoneByLid(lid);
+      if (phone) {
+        patient = await this.prisma.patient.findUnique({ where: { waNumber: phone, active: true } });
+        if (patient) {
+          await this.prisma.patient.update({ where: { id: patient.id }, data: { lid } });
+        }
+      }
+    }
 
     if (!patient) return;
 
     if (patient.consentStatus !== "opted_in") {
-      await this.handleConsent(patient.id, waNumber, payload);
+      await this.handleConsent(patient.id, patient.waNumber, payload);
       return;
     }
 
@@ -65,7 +82,7 @@ export class WahaWebhookService {
 
       if (template) {
         await this.waha.sendText(
-          `${waNumber}@c.us`,
+          `${patient.waNumber}@c.us`,
           `${template.title}\n\n${template.body}`,
         );
       }
@@ -120,7 +137,7 @@ export class WahaWebhookService {
       }
     }
 
-    await this.waha.sendText(`${waNumber}@c.us`, `Tercatat. Terima kasih.`);
+    await this.waha.sendText(`${patient.waNumber}@c.us`, `Tercatat. Terima kasih.`);
   }
 
   private async handleConsent(

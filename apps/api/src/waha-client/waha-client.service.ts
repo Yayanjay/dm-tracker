@@ -127,4 +127,26 @@ export class WahaClientService {
       return null;
     }
   }
+
+  async getLidByPhone(phone: string): Promise<string | null> {
+    try {
+      const { data } = await this.client.get(
+        `/api/${this.sessionName}/lids/pn/${phone}`,
+      );
+      return data?.lid ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async getPhoneByLid(lid: string): Promise<string | null> {
+    try {
+      const { data } = await this.client.get(
+        `/api/${this.sessionName}/lids/${lid}`,
+      );
+      return data?.phoneNumber?.replace(/^\+/, "").replace("@c.us", "") ?? null;
+    } catch {
+      return null;
+    }
+  }
 }

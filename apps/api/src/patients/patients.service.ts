@@ -171,6 +171,14 @@ export class PatientsService {
       const text = `${template.title}\n\n${body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
       await this.waha.sendText(chatId, text);
 
+      const lid = await this.waha.getLidByPhone(waNumber);
+      if (lid) {
+        await this.prisma.patient.update({
+          where: { id: patientId },
+          data: { lid },
+        });
+      }
+
       await this.prisma.outboundMessage.create({
         data: {
           patientId,
