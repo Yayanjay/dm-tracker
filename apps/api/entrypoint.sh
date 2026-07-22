@@ -6,9 +6,6 @@ until npx prisma db push --schema packages/prisma/schema.prisma --skip-generate 
   sleep 2
 done
 
-echo "Running migrations..."
-npx prisma migrate deploy --schema packages/prisma/schema.prisma
-
 echo "Seeding database..."
 npx tsx packages/prisma/seed.ts
 
