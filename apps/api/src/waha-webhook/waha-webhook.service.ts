@@ -33,6 +33,17 @@ export class WahaWebhookService {
       return;
     }
 
+    if (event === "message.ack") {
+      const ack = body?.payload?.ack;
+      const ackName = body?.payload?.ackName ?? "UNKNOWN";
+      const msgId = body?.payload?.id ?? "?";
+      const to = body?.payload?.to ?? "?";
+      this.logger.log(
+        `Message ack: status=${ackName}(${ack}) id=${msgId} to=${to}`,
+      );
+      return;
+    }
+
     this.logger.warn(`Unknown webhook event: ${event}`);
   }
 
@@ -43,8 +54,13 @@ export class WahaWebhookService {
     let patient: any = null;
 
     if (from.includes("@lid")) {
-      const lid = from.replace("@lid", "");
-      patient = await this.prisma.patient.findFirst({ where: { lid, active: true } });
+      const normalizedLid = from.replace("@lid", "");
+      patient = await this.prisma.patient.findFirst({
+        where: {
+          active: true,
+          OR: [{ lid: normalizedLid }, { lid: `${normalizedLid}@lid` }],
+        },
+      });
     } else {
       const waNumber = from.replace("@c.us", "");
       patient = await this.prisma.patient.findUnique({ where: { waNumber, active: true } });

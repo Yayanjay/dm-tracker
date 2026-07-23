@@ -181,8 +181,9 @@ export class PatientsService {
       await this.waha.sendText(chatId, text);
       this.logger.log(`Opt-in sent to ${name} (${waNumber})`);
 
-      const lid = await this.waha.getLidByPhone(waNumber);
-      if (lid) {
+      const rawLid = await this.waha.getLidByPhone(waNumber);
+      if (rawLid) {
+        const lid = rawLid.replace("@lid", "");
         await this.prisma.patient.update({
           where: { id: patientId },
           data: { lid },
