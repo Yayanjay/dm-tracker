@@ -1,8 +1,10 @@
+import { randomBytes } from "crypto";
 import {
   Injectable,
   ConflictException,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
@@ -114,6 +116,7 @@ export class PatientsService {
       data: {
         name: dto.name,
         waNumber,
+        enrollmentToken: randomBytes(4).toString("hex"),
         dob: dto.dob ? new Date(dto.dob) : null,
         consentStatus: "pending",
         createdById: adminId,
@@ -123,6 +126,29 @@ export class PatientsService {
     await this.sendOptIn(patient.id, patient.name, patient.waNumber);
 
     return { data: patient };
+  }
+
+  async getEnrollmentLink(patientId: string): Promise<{ url: string }> {
+    const patient = await this.prisma.patient.findUnique({ where: { id: patientId } });
+    if (!patient) throw new NotFoundException("Pasien tidak ditemukan");
+
+    let token = patient.enrollmentToken;
+    if (!token) {
+      token = randomBytes(4).toString("hex");
+      await this.prisma.patient.update({ where: { id: patientId }, data: { enrollmentToken: token } });
+    }
+
+    const status = await this.waha.getSessionStatus();
+    const botNumber = status.number;
+    if (!botNumber) {
+      throw new InternalServerErrorException(
+        "Nomor WhatsApp belum terhubung. Buka halaman WhatsApp untuk menghubungkan nomor terlebih dahulu.",
+      );
+    }
+
+    const text = `Halo KawalGula, saya ingin mengikuti program DM tracker ${token}`;
+    const url = `https://wa.me/${botNumber}?text=${encodeURIComponent(text)}`;
+    return { url };
   }
 
   private normalizeWaNumber(raw: string): string {

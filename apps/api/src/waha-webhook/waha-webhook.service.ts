@@ -166,12 +166,15 @@ export class WahaWebhookService {
     waNumber: string,
     payload: any,
   ) {
+    const patient = await this.prisma.patient.findUnique({ where: { id: patientId } });
+    const token = patient?.enrollmentToken;
+
     const buttonText = payload?.button?.text || payload?.buttonText || "";
     const body = payload?.body || "";
     const input = (buttonText + " " + body).toLowerCase().trim();
 
-    const isAgreed = /setuju/i.test(input) || /ya/i.test(input);
     const isDeclined = /nanti/i.test(input) || /tidak/i.test(input) || /batal/i.test(input);
+    const isAgreed = (token && input.includes(token.toLowerCase())) || /setuju/i.test(input) || /ya/i.test(input);
 
     const chatId = `${waNumber}@c.us`;
 
@@ -181,9 +184,10 @@ export class WahaWebhookService {
         data: {
           consentStatus: "opted_in",
           consentAt: new Date(),
+          ...(token ? { enrollmentToken: null } : {}),
         },
       });
-      this.logger.log(`Consent: opted_in for patientId=${patientId}`);
+      this.logger.log(`Consent: opted_in for patientId=${patientId} (token=${token ? "matched" : "keyword"})`);
 
       const template = await this.prisma.templateMessage.findUnique({
         where: { key: "optin_confirm" },
@@ -206,6 +210,7 @@ export class WahaWebhookService {
         data: {
           consentStatus: "opted_out",
           consentAt: new Date(),
+          ...(token ? { enrollmentToken: null } : {}),
         },
       });
       this.logger.log(`Consent: opted_out for patientId=${patientId}`);

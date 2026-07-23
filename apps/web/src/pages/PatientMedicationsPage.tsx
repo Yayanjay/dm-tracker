@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../lib/api";
 import { useToast } from "../lib/toast";
 import { Plus, Trash2, Bell } from "lucide-react";
+import EnrollmentQr from "../components/EnrollmentQr";
 
 interface MasterMedication {
   id: string;
@@ -112,6 +113,8 @@ export default function PatientMedicationsPage() {
           <p className="text-sm text-muted-foreground">Pilih obat dari daftar dan atur jadwal</p>
         </div>
       </div>
+
+      {id && <EnrollmentQr patientId={id} />}
 
       <form onSubmit={handleSubmit} className="flex items-end gap-3 rounded-lg border p-4">
         <div className="flex-1">

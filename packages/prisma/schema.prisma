@@ -77,6 +77,7 @@ model Patient {
   name          String
   waNumber      String        @unique @map("wa_number")
   lid           String?
+  enrollmentToken String? @unique @map("enrollment_token")
   dob           DateTime?
   consentStatus ConsentStatus @default(pending) @map("consent_status")
   consentAt     DateTime?     @map("consent_at")

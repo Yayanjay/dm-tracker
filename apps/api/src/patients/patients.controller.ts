@@ -45,6 +45,11 @@ export class PatientsController {
     return this.patientsService.resendOptin(id);
   }
 
+  @Get(":id/enrollment-link")
+  async enrollmentLink(@Param("id") id: string) {
+    return this.patientsService.getEnrollmentLink(id);
+  }
+
   @Delete(":id")
   async delete(@Param("id") id: string) {
     await this.patientsService.delete(id);
