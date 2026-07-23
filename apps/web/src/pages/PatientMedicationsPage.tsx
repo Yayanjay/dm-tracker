@@ -91,8 +91,8 @@ export default function PatientMedicationsPage() {
 
   const handleSendNow = async (assignmentId: string) => {
     try {
-      await api.post("/reminders/send-now", { patientMedicationId: assignmentId });
-      toast("Pengingat dikirim");
+      const res = await api.post("/reminders/send-now", { patientMedicationId: assignmentId });
+      toast(res.data?.data?.message || "Pengingat dikirim");
     } catch (err: any) {
       toast(err.response?.data?.message || "Gagal", "error");
     }

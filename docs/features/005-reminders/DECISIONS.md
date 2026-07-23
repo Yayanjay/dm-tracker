@@ -49,7 +49,15 @@ Per AGENTS.md missed rule:
 - **Timezone conversion** — reminder seeder takes `scheduleTimes` (a `HH:mm` WIB string), combines with current date, converts WIB → UTC using `Asia/Jakarta` timezone. Formula: `WIB = UTC+7`.
 - **Idempotent seeder** — checks for existing `Reminder` with same `(medicationId, scheduledAt)` before inserting. If already exists (any status), skip.
 - **Seeder window** — generates reminders for the upcoming 24 hours only. Not more (avoids flooding the queue on first run).
-- **No manual remind** — admins cannot create a one-off "remind me now" in MVP. Only schedule-based.
+- **No manual remind (scheduler only)** — the cron `reminder-dispatcher` is the only automated sender. Admins do NOT create/edit/delete `Reminder` rows directly.
+- **Manual "send now" (admin action)** — `POST /api/v1/reminders/send-now` with `{ patientMedicationId }` triggers an immediate one-off send. Gated by `ENABLE_MANUAL_REMINDER === "true"` (env). Rules:
+  - Patient must be `consentStatus: opted_in`, else `400 Pasien belum opted_in`.
+  - `reminder` template must exist, else `400`.
+  - Sends via `WahaClientService.sendText` immediately (not queued).
+  - On success: creates an `OutboundMessage(kind=reminder, status=sent)` **and** a `Reminder(status=sent, scheduledAt=now, manual=true)`. The patient's reply flows through the normal consumption webhook (reminder → `confirmed` + linked `ConsumptionLog`), so manual sends can be used to test the full response lifecycle.
+  - On WAHA failure: creates `OutboundMessage(status=failed)`, returns `500`.
+  - Does NOT reuse the scheduled `dispatchReminders()` path (which only sends pre-existing `pending` rows).
+- **Manual reminders excluded from missed logic (test-only)** — `Reminder.manual=true` rows are for testing patient responses. The missed-marker treats them as fully decoupled: they are NEVER marked `missed` (an unanswered manual reminder stays `sent`), and they NEVER act as the "next-dose" trigger that marks a scheduled dose `missed`. Missed-marking applies only to scheduler-generated (`manual=false`) reminders.
 - **Failed reminders** — stored as `status=failed` with error. No automatic re-enqueue (admin may notice in dashboard and contact patient manually). But outbound retry handles transient WAHA errors.
 
 ## Edge cases

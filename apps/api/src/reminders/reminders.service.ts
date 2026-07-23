@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
 import { renderTemplate } from "@kawalgula/shared";
@@ -144,12 +144,92 @@ export class RemindersService {
     }
   }
 
+  async sendManualReminder(patientMedicationId: string): Promise<number> {
+    const pm = await this.prisma.patientMedication.findFirst({
+      where: { id: patientMedicationId, active: true },
+      include: { patient: true, medication: true },
+    });
+
+    if (!pm) {
+      throw new NotFoundException("Assignment obat tidak ditemukan");
+    }
+
+    if (pm.patient.consentStatus !== "opted_in") {
+      throw new BadRequestException("Pasien belum opted_in");
+    }
+
+    const template = await this.prisma.templateMessage.findUnique({
+      where: { key: "reminder" },
+    });
+    if (!template) {
+      throw new BadRequestException("Template reminder belum dibuat");
+    }
+
+    const chatId = `${pm.patient.waNumber}@c.us`;
+    const body = renderTemplate(template.body, {
+      name: pm.patient.name,
+      medication_name: pm.medication.name,
+      dosage: pm.medication.dosage,
+      unit: pm.medication.unit,
+    });
+    const text = `${template.title}\n\n${body}\n\nBalas "sudah" jika sudah minum, "belum" jika belum.`;
+
+    try {
+      const wahaMessageId = await this.waha.sendText(chatId, text);
+
+      await this.prisma.reminder.create({
+        data: {
+          patientId: pm.patientId,
+          patientMedicationId: pm.id,
+          scheduledAt: new Date(),
+          status: "sent",
+          sentAt: new Date(),
+          wahaMessageId,
+          manual: true,
+        },
+      });
+
+      await this.prisma.outboundMessage.create({
+        data: {
+          patientId: pm.patientId,
+          kind: "reminder",
+          payload: { chatId, body, buttons: template.buttonLabels },
+          wahaMessageId,
+          status: "sent",
+          createdById: "SYSTEM",
+        },
+      });
+
+      this.logger.log(
+        `Manual reminder sent to ${pm.patient.name} for ${pm.medication.name}`,
+      );
+      return 1;
+    } catch (error: any) {
+      await this.prisma.outboundMessage.create({
+        data: {
+          patientId: pm.patientId,
+          kind: "reminder",
+          payload: { chatId },
+          status: "failed",
+          error: error.message,
+          createdById: "SYSTEM",
+        },
+      });
+      this.logger.error(
+        `Manual reminder failed for ${pm.patient.name}: ${error.message}`,
+      );
+      throw new InternalServerErrorException(
+        `Gagal mengirim pengingat: ${error.message}`,
+      );
+    }
+  }
+
   async markMissed() {
     const now = new Date();
     let missedCount = 0;
 
     const sentReminders = await this.prisma.reminder.findMany({
-      where: { status: "sent" },
+      where: { status: "sent", manual: false },
     });
 
     for (const reminder of sentReminders) {
@@ -163,6 +243,7 @@ export class RemindersService {
         where: {
           patientMedicationId: reminder.patientMedicationId,
           scheduledAt: { gt: reminder.scheduledAt },
+          manual: false,
         },
         orderBy: { scheduledAt: "asc" },
       });

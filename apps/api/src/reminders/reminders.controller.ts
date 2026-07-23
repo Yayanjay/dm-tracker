@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, ForbiddenException } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, ForbiddenException, BadRequestException } from "@nestjs/common";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { RemindersService } from "./reminders.service";
 import { ConfigService } from "@nestjs/config";
@@ -16,7 +16,10 @@ export class RemindersController {
     if (this.config.get<string>("ENABLE_MANUAL_REMINDER") !== "true") {
       throw new ForbiddenException("Manual reminder is disabled");
     }
-    await this.remindersService.dispatchReminders(patientMedicationId);
-    return { data: { message: "Pengingat dikirim" } };
+    if (!patientMedicationId) {
+      throw new BadRequestException("patientMedicationId is required");
+    }
+    const sent = await this.remindersService.sendManualReminder(patientMedicationId);
+    return { data: { message: "Pengingat dikirim", sent } };
   }
 }

@@ -138,6 +138,7 @@ model Reminder {
   status              ReminderStatus @default(pending)
   sentAt              DateTime?      @map("sent_at")
   wahaMessageId       String?        @map("waha_message_id")
+  manual              Boolean        @default(false) @map("manual")
   createdAt           DateTime       @default(now()) @map("created_at")
   updatedAt           DateTime       @default(now()) @updatedAt @map("updated_at")
   createdById         String         @default("SYSTEM") @map("created_by_id")
