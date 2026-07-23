@@ -34,6 +34,12 @@ export class WhatsappSessionService {
     await this.redis.del(this.NUMBER_KEY);
   }
 
+  async delete(): Promise<void> {
+    await this.waha.deleteSession();
+    await this.redis.del(this.STATUS_KEY);
+    await this.redis.del(this.NUMBER_KEY);
+  }
+
   async getStatus(): Promise<{ status: string; number: string | null }> {
     const status = await this.redis.get(this.STATUS_KEY);
     const number = await this.redis.get(this.NUMBER_KEY);

@@ -104,6 +104,16 @@ export class WahaClientService {
     }
   }
 
+  async deleteSession(): Promise<void> {
+    try {
+      await this.client.delete(`/api/sessions/${this.sessionName}`);
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        `Gagal menghapus session WAHA: ${error.response?.data?.message || error.message}`,
+      );
+    }
+  }
+
   async getSessionStatus(): Promise<{ status: string; number?: string }> {
     try {
       const { data } = await this.client.get(`/api/sessions/${this.sessionName}`);

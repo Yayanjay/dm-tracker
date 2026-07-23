@@ -83,24 +83,32 @@ export default function WhatsappPage() {
     }
   }, [status?.status, qrTs, fetchQr]);
 
-  const handleAction = async (action: "start" | "stop") => {
+  const handleAction = async (action: "start" | "stop" | "delete") => {
     setProcessing(action);
     try {
-      await api.post(`/whatsapp/session/${action}`);
-      if (action === "start") {
-        toast("Session dimulai", "success");
-        clearInterval(pollingRef.current);
-        clearTimeout(forcePollRef.current);
-        setStatus({ status: "STARTING", number: null });
-        const interval = setInterval(fetchStatus, 2000);
-        forcePollRef.current = setTimeout(() => {
-          clearInterval(interval);
-        }, 30000);
-      } else {
+      if (action === "delete") {
+        await api.delete("/whatsapp/session");
         clearInterval(pollingRef.current);
         clearTimeout(forcePollRef.current);
         await fetchStatus();
-        toast("Session dihentikan", "success");
+        toast("Session dihapus", "success");
+      } else {
+        await api.post(`/whatsapp/session/${action}`);
+        if (action === "start") {
+          toast("Session dimulai", "success");
+          clearInterval(pollingRef.current);
+          clearTimeout(forcePollRef.current);
+          setStatus({ status: "STARTING", number: null });
+          const interval = setInterval(fetchStatus, 2000);
+          forcePollRef.current = setTimeout(() => {
+            clearInterval(interval);
+          }, 30000);
+        } else {
+          clearInterval(pollingRef.current);
+          clearTimeout(forcePollRef.current);
+          await fetchStatus();
+          toast("Session dihentikan", "success");
+        }
       }
     } catch (err: any) {
       toast(err.response?.data?.message || "Gagal", "error");
@@ -157,7 +165,7 @@ export default function WhatsappPage() {
       )}
 
       <div className="flex gap-3">
-        {processing !== "stop" && status?.status !== "WORKING" && (
+        {processing !== "stop" && processing !== "delete" && status?.status !== "WORKING" && (
           <button
             onClick={() => handleAction("start")}
             disabled={processing !== null}
@@ -167,7 +175,7 @@ export default function WhatsappPage() {
             {processing === "start" ? "Memulai..." : "Mulai Session"}
           </button>
         )}
-        {processing !== "start" && status?.status === "WORKING" && (
+        {processing !== "start" && processing !== "delete" && status?.status === "WORKING" && (
           <button
             onClick={() => handleAction("stop")}
             disabled={processing !== null}
@@ -175,6 +183,16 @@ export default function WhatsappPage() {
           >
             {processing === "stop" && <Loader2 className="h-4 w-4 animate-spin" />}
             {processing === "stop" ? "Menghentikan..." : "Hentikan Session"}
+          </button>
+        )}
+        {processing !== "start" && processing !== "stop" && (
+          <button
+            onClick={() => handleAction("delete")}
+            disabled={processing !== null}
+            className="inline-flex items-center gap-2 rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+          >
+            {processing === "delete" && <Loader2 className="h-4 w-4 animate-spin" />}
+            {processing === "delete" ? "Menghapus..." : "Hapus Session"}
           </button>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, UseGuards, Res } from "@nestjs/common";
+import { Controller, Post, Get, Delete, UseGuards, Res } from "@nestjs/common";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { WhatsappSessionService } from "./whatsapp-session.service";
 import { Response } from "express";
@@ -18,6 +18,12 @@ export class WhatsappSessionController {
   async stop() {
     await this.whatsappSession.stop();
     return { message: "Session stopped" };
+  }
+
+  @Delete()
+  async delete() {
+    await this.whatsappSession.delete();
+    return { message: "Session deleted" };
   }
 
   @Get("status")
