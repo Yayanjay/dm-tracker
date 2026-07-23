@@ -194,6 +194,25 @@ export class PatientsService {
     await this.prisma.patient.delete({ where: { id } });
   }
 
+  private async resolveChatId(waNumber: string, patientId?: string): Promise<string> {
+    try {
+      const rawLid = await this.waha.getLidByPhone(waNumber);
+      if (rawLid) {
+        const lid = rawLid.replace("@lid", "");
+        if (patientId) {
+          await this.prisma.patient.update({
+            where: { id: patientId },
+            data: { lid },
+          }).catch(() => {});
+        }
+        return `${lid}@lid`;
+      }
+    } catch {
+      // ignore; fall back to @c.us
+    }
+    return `${waNumber}@c.us`;
+  }
+
   private async sendOptIn(patientId: string, name: string, waNumber: string) {
     const template = await this.prisma.templateMessage.findUnique({
       where: { key: "enrollment" },
@@ -201,7 +220,7 @@ export class PatientsService {
 
     if (!template) return;
 
-    const chatId = `${waNumber}@c.us`;
+    let chatId = await this.resolveChatId(waNumber, patientId);
     const body = renderTemplate(template.body, { name });
 
     try {
@@ -250,7 +269,7 @@ export class PatientsService {
 
     if (!template) return;
 
-    const chatId = `${waNumber}@c.us`;
+    const chatId = await this.resolveChatId(waNumber);
     const body = renderTemplate(template.body, { name });
 
     try {
