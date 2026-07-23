@@ -60,22 +60,35 @@ export class WahaClientService {
 
   async sendText(chatId: string, text: string): Promise<string> {
     await this.ensureSessionWorking();
-    try {
-      const { data } = await this.client.post("/api/sendText", {
-        session: this.sessionName,
-        chatId,
-        text,
-      });
-      const id = data?.id;
-      if (id && typeof id === "object" && "id" in id) {
-        return String((id as Record<string, unknown>).id);
+
+    let lastError: any;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const { data } = await this.client.post("/api/sendText", {
+          session: this.sessionName,
+          chatId,
+          text,
+        });
+        const id = data?.id;
+        if (id && typeof id === "object" && "id" in id) {
+          return String((id as Record<string, unknown>).id);
+        }
+        return (id as string) ?? "unknown";
+      } catch (error: any) {
+        lastError = error;
+        // transient/rate-limit errors: retry once after a short delay
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 2000));
+          continue;
+        }
+        throw new InternalServerErrorException(
+          `Gagal mengirim pesan teks: ${error.response?.data?.message || error.message}`,
+        );
       }
-      return (id as string) ?? "unknown";
-    } catch (error: any) {
-      throw new InternalServerErrorException(
-        `Gagal mengirim pesan teks: ${error.response?.data?.message || error.message}`,
-      );
     }
+    throw new InternalServerErrorException(
+      `Gagal mengirim pesan teks: ${lastError?.response?.data?.message || lastError?.message}`,
+    );
   }
 
   async startSession(): Promise<void> {
