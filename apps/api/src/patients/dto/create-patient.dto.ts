@@ -5,8 +5,8 @@ export class CreatePatientDto {
   name: string;
 
   @IsString()
-  @Matches(/^\d{10,15}$/, {
-    message: "Nomor WA harus berupa angka 10-15 digit tanpa +, -, atau spasi",
+  @Matches(/^\+?[\d\s-]{9,20}$/, {
+    message: "Nomor WA harus diawali 08 atau +62, boleh memakai spasi atau tanda -",
   })
   waNumber: string;
 

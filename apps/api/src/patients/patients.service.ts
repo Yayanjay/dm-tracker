@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
@@ -99,8 +100,10 @@ export class PatientsService {
   }
 
   async create(dto: CreatePatientDto, adminId: string) {
+    const waNumber = this.normalizeWaNumber(dto.waNumber);
+
     const existing = await this.prisma.patient.findUnique({
-      where: { waNumber: dto.waNumber },
+      where: { waNumber },
     });
 
     if (existing) {
@@ -110,7 +113,7 @@ export class PatientsService {
     const patient = await this.prisma.patient.create({
       data: {
         name: dto.name,
-        waNumber: dto.waNumber,
+        waNumber,
         dob: dto.dob ? new Date(dto.dob) : null,
         consentStatus: "pending",
         createdById: adminId,
@@ -120,6 +123,31 @@ export class PatientsService {
     await this.sendOptIn(patient.id, patient.name, patient.waNumber);
 
     return { data: patient };
+  }
+
+  private normalizeWaNumber(raw: string): string {
+    const digits = raw.replace(/\D/g, "");
+
+    let normalized: string;
+    if (digits.startsWith("62")) {
+      normalized = digits;
+    } else if (digits.startsWith("0")) {
+      normalized = "62" + digits.slice(1);
+    } else if (digits.startsWith("8")) {
+      normalized = "62" + digits;
+    } else {
+      throw new BadRequestException(
+        "Format nomor WA tidak valid. Gunakan 08xxx atau +62xxx.",
+      );
+    }
+
+    if (normalized.length < 10 || normalized.length > 15) {
+      throw new BadRequestException(
+        "Nomor WA harus 10-15 digit setelah kode negara.",
+      );
+    }
+
+    return normalized;
   }
 
   async update(id: string, dto: UpdatePatientDto) {
