@@ -1,0 +1,21 @@
+name: Deploy to homelab
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Pull, build and deploy on homelab
+        run: |
+          set -e
+          cd /home/zayyan/application/kawalgula
+          git pull --ff-only origin main
+          docker compose build
+          docker compose up -d
+          docker image prune -f

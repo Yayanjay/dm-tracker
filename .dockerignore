@@ -1,6 +1,8 @@
-node_modules/
-dist/
 .env
+.env.*
+node_modules
+dist
+.sessions
+.git
 *.db
-.sessions/
-.git/
+*.db-journal
