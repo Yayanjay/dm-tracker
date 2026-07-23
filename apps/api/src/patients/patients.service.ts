@@ -180,9 +180,9 @@ export class PatientsService {
     }
 
     if (patient.consentStatus === "opted_in") {
-      this.sendAlreadyOptedIn(patient.name, patient.waNumber);
+      await this.sendAlreadyOptedIn(patient.name, patient.waNumber);
     } else {
-    await this.sendOptIn(patient.id, patient.name, patient.waNumber);
+      await this.sendOptIn(patient.id, patient.name, patient.waNumber);
     }
 
     return { data: null };
@@ -194,23 +194,25 @@ export class PatientsService {
     await this.prisma.patient.delete({ where: { id } });
   }
 
-  private async resolveChatId(waNumber: string, patientId?: string): Promise<string> {
+  private async resolveLid(waNumber: string, patientId?: string): Promise<string | null> {
     try {
       const rawLid = await this.waha.getLidByPhone(waNumber);
       if (rawLid) {
         const lid = rawLid.replace("@lid", "");
+        this.logger.log(`Opt-in LID resolve for ${waNumber}: ${lid}`);
         if (patientId) {
           await this.prisma.patient.update({
             where: { id: patientId },
             data: { lid },
           }).catch(() => {});
         }
-        return `${lid}@lid`;
+        return lid;
       }
     } catch {
-      // ignore; fall back to @c.us
+      // ignore; treat as no LID
     }
-    return `${waNumber}@c.us`;
+    this.logger.log(`Opt-in LID resolve for ${waNumber}: none`);
+    return null;
   }
 
   private async sendOptIn(patientId: string, name: string, waNumber: string) {
@@ -220,35 +222,52 @@ export class PatientsService {
 
     if (!template) return;
 
-    let chatId = await this.resolveChatId(waNumber, patientId);
     const body = renderTemplate(template.body, { name });
+    const text = `${template.title}\n\n${body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
+
+    const lid = await this.resolveLid(waNumber, patientId);
+    let chatId = `${waNumber}@c.us`;
+    let sent = false;
+    let wahaMessageId: string | undefined;
+    let lastError: any;
 
     try {
-      const text = `${template.title}\n\n${body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
-      await this.waha.sendText(chatId, text);
-      this.logger.log(`Opt-in sent to ${name} (${waNumber})`);
-
-      const rawLid = await this.waha.getLidByPhone(waNumber);
-      if (rawLid) {
-        const lid = rawLid.replace("@lid", "");
-        await this.prisma.patient.update({
-          where: { id: patientId },
-          data: { lid },
-        });
-        this.logger.log(`LID stored for ${name}: ${lid}`);
+      wahaMessageId = await this.waha.sendText(chatId, text);
+      sent = true;
+    } catch (error: any) {
+      lastError = error;
+      if (lid) {
+        const lidChatId = `${lid}@lid`;
+        this.logger.warn(
+          `@c.us opt-in failed for ${name} (${waNumber}): ${error.message}; falling back to ${lidChatId}`,
+        );
+        try {
+          wahaMessageId = await this.waha.sendText(lidChatId, text);
+          chatId = lidChatId;
+          sent = true;
+        } catch (err: any) {
+          lastError = err;
+        }
       }
+    }
 
+    if (sent) {
+      this.logger.log(
+        `Opt-in sent to ${name} (${waNumber}) via ${chatId}, wahaId=${wahaMessageId}`,
+      );
       await this.prisma.outboundMessage.create({
         data: {
           patientId,
           kind: "opt_in",
-          payload: { chatId, body, buttons: template.buttonLabels },
+          payload: { chatId, wahaMessageId, body, buttons: template.buttonLabels },
           status: "sent",
           createdById: "SYSTEM",
         },
       });
-    } catch (error: any) {
-      this.logger.error(`Opt-in send failed for ${name}: ${error.message}`);
+    } else {
+      this.logger.error(
+        `Opt-in send failed for ${name} (${waNumber}): ${lastError?.message}`,
+      );
       await this.prisma.outboundMessage.create({
         data: {
           patientId,
@@ -269,13 +288,42 @@ export class PatientsService {
 
     if (!template) return;
 
-    const chatId = await this.resolveChatId(waNumber);
+    const lid = await this.resolveLid(waNumber);
     const body = renderTemplate(template.body, { name });
+    const text = `${template.title}\n\n${body}`;
+
+    let chatId = `${waNumber}@c.us`;
+    let sent = false;
+    let lastError: any;
 
     try {
-      await this.waha.sendText(chatId, `${template.title}\n\n${body}`);
-    } catch {
-      // silently fail
+      await this.waha.sendText(chatId, text);
+      sent = true;
+    } catch (error: any) {
+      lastError = error;
+      if (lid) {
+        const lidChatId = `${lid}@lid`;
+        this.logger.warn(
+          `@c.us already-opted-in failed for ${name} (${waNumber}): ${error.message}; falling back to ${lidChatId}`,
+        );
+        try {
+          await this.waha.sendText(lidChatId, text);
+          chatId = lidChatId;
+          sent = true;
+        } catch (err: any) {
+          lastError = err;
+        }
+      }
+    }
+
+    if (sent) {
+      this.logger.log(
+        `Already-opted-in sent to ${name} (${waNumber}) via ${chatId}`,
+      );
+    } else {
+      this.logger.error(
+        `Already-opted-in send failed for ${name} (${waNumber}): ${lastError?.message}`,
+      );
     }
   }
 }
