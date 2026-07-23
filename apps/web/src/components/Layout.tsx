@@ -8,6 +8,7 @@ import {
   LogOut,
   LayoutDashboard,
 } from "lucide-react";
+import SessionStatusIndicator from "./SessionStatusIndicator";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -29,7 +30,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <aside className="w-56 border-r bg-muted/40 p-4 flex flex-col">
-        <h1 className="text-lg font-bold mb-6">KawalGula</h1>
+        <h1 className="text-lg font-bold mb-2">KawalGula</h1>
+        <SessionStatusIndicator />
         <nav className="flex flex-col gap-1 flex-1">
           {navItems.map((item) => (
             <NavLink

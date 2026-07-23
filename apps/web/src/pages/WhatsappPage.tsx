@@ -1,20 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import api from "../lib/api";
 import { useToast } from "../lib/toast";
-import { Smartphone, CheckCircle, XCircle, RefreshCw, Loader2 } from "lucide-react";
-
-interface SessionStatus {
-  status: string;
-  number: string | null;
-}
-
-const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle }> = {
-  STOPPED: { label: "Terhenti", color: "bg-gray-500", icon: XCircle },
-  STARTING: { label: "Memulai...", color: "bg-yellow-500", icon: Loader2 },
-  SCAN_QR_CODE: { label: "Scan QR Code", color: "bg-blue-500", icon: Loader2 },
-  WORKING: { label: "Terhubung", color: "bg-green-500", icon: CheckCircle },
-  FAILED: { label: "Gagal", color: "bg-red-500", icon: XCircle },
-};
+import { Smartphone, RefreshCw, Loader2 } from "lucide-react";
+import { statusConfig, SessionStatus } from "../lib/sessionStatus";
 
 export default function WhatsappPage() {
   const { toast } = useToast();

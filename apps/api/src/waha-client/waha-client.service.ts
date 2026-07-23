@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 
@@ -20,8 +20,17 @@ export class WahaClientService {
     this.client = axios.create({
       baseURL: apiUrl,
       headers: { "X-Api-Key": apiKey, "Content-Type": "application/json" },
-      timeout: 10000,
+      timeout: config.get<number>("WAHA_TIMEOUT_MS", 30000),
     });
+  }
+
+  private async ensureSessionWorking(): Promise<void> {
+    const { status } = await this.getSessionStatus();
+    if (status !== "WORKING") {
+      throw new BadRequestException(
+        "Sesi WhatsApp belum terhubung. Buka halaman WhatsApp untuk menghubungkan nomor terlebih dahulu.",
+      );
+    }
   }
 
   async sendButtons(
@@ -31,6 +40,7 @@ export class WahaClientService {
     footer: string,
     buttons: WahaButton[],
   ): Promise<string> {
+    await this.ensureSessionWorking();
     try {
       const { data } = await this.client.post("/api/sendButtons", {
         session: this.sessionName,
@@ -49,6 +59,7 @@ export class WahaClientService {
   }
 
   async sendText(chatId: string, text: string): Promise<string> {
+    await this.ensureSessionWorking();
     try {
       const { data } = await this.client.post("/api/sendText", {
         session: this.sessionName,

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { WahaClientService } from "../waha-client/waha-client.service";
 import { renderTemplate } from "@kawalgula/shared";
@@ -218,9 +218,7 @@ export class RemindersService {
       this.logger.error(
         `Manual reminder failed for ${pm.patient.name}: ${error.message}`,
       );
-      throw new InternalServerErrorException(
-        `Gagal mengirim pengingat: ${error.message}`,
-      );
+      throw error;
     }
   }
 
