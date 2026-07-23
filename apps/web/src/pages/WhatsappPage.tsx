@@ -19,7 +19,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: typeof 
 export default function WhatsappPage() {
   const { toast } = useToast();
   const [status, setStatus] = useState<SessionStatus | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState<string | null>(null);
   const [qrTs, setQrTs] = useState(Date.now());
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval>>();
@@ -84,20 +84,28 @@ export default function WhatsappPage() {
   }, [status?.status, qrTs, fetchQr]);
 
   const handleAction = async (action: "start" | "stop") => {
-    setLoading(true);
+    setProcessing(action);
     try {
       await api.post(`/whatsapp/session/${action}`);
       if (action === "start") {
+        toast("Session dimulai", "success");
+        clearInterval(pollingRef.current);
+        clearTimeout(forcePollRef.current);
         setStatus({ status: "STARTING", number: null });
         const interval = setInterval(fetchStatus, 2000);
         forcePollRef.current = setTimeout(() => {
           clearInterval(interval);
         }, 30000);
+      } else {
+        clearInterval(pollingRef.current);
+        clearTimeout(forcePollRef.current);
+        await fetchStatus();
+        toast("Session dihentikan", "success");
       }
     } catch (err: any) {
       toast(err.response?.data?.message || "Gagal", "error");
     }
-    setLoading(false);
+    setProcessing(null);
   };
 
   const config = status ? statusConfig[status.status] || statusConfig.STOPPED : null;
@@ -149,22 +157,24 @@ export default function WhatsappPage() {
       )}
 
       <div className="flex gap-3">
-        {status?.status !== "WORKING" && (
+        {processing !== "stop" && status?.status !== "WORKING" && (
           <button
             onClick={() => handleAction("start")}
-            disabled={loading}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            disabled={processing !== null}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
-            {loading ? "..." : "Mulai Session"}
+            {processing === "start" && <Loader2 className="h-4 w-4 animate-spin" />}
+            {processing === "start" ? "Memulai..." : "Mulai Session"}
           </button>
         )}
-        {status?.status === "WORKING" && (
+        {processing !== "start" && status?.status === "WORKING" && (
           <button
             onClick={() => handleAction("stop")}
-            disabled={loading}
-            className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
+            disabled={processing !== null}
+            className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
-            Hentikan Session
+            {processing === "stop" && <Loader2 className="h-4 w-4 animate-spin" />}
+            {processing === "stop" ? "Menghentikan..." : "Hentikan Session"}
           </button>
         )}
       </div>
