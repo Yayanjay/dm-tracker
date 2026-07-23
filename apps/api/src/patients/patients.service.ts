@@ -226,40 +226,35 @@ export class PatientsService {
     const text = `${template.title}\n\n${body}\n\nBalas "setuju" untuk mendaftar atau "nanti" untuk menunda.`;
 
     const lid = await this.resolveLid(waNumber, patientId);
-    let chatId = `${waNumber}@c.us`;
-    let sent = false;
-    let wahaMessageId: string | undefined;
+    const targets = [`${waNumber}@c.us`];
+    if (lid) targets.push(`${lid}@lid`);
+
+    const attempted: { chatId: string; wahaId?: string }[] = [];
+    let sentAny = false;
     let lastError: any;
 
-    try {
-      wahaMessageId = await this.waha.sendText(chatId, text);
-      sent = true;
-    } catch (error: any) {
-      lastError = error;
-      if (lid) {
-        const lidChatId = `${lid}@lid`;
-        this.logger.warn(
-          `@c.us opt-in failed for ${name} (${waNumber}): ${error.message}; falling back to ${lidChatId}`,
+    for (const chatId of targets) {
+      try {
+        const wahaMessageId = await this.waha.sendText(chatId, text);
+        attempted.push({ chatId, wahaId: wahaMessageId });
+        this.logger.log(
+          `Opt-in sent to ${name} (${waNumber}) via ${chatId}, wahaId=${wahaMessageId}`,
         );
-        try {
-          wahaMessageId = await this.waha.sendText(lidChatId, text);
-          chatId = lidChatId;
-          sent = true;
-        } catch (err: any) {
-          lastError = err;
-        }
+        sentAny = true;
+      } catch (error: any) {
+        lastError = error;
+        this.logger.warn(
+          `Opt-in send failed for ${name} (${waNumber}) via ${chatId}: ${error.message}`,
+        );
       }
     }
 
-    if (sent) {
-      this.logger.log(
-        `Opt-in sent to ${name} (${waNumber}) via ${chatId}, wahaId=${wahaMessageId}`,
-      );
+    if (sentAny) {
       await this.prisma.outboundMessage.create({
         data: {
           patientId,
           kind: "opt_in",
-          payload: { chatId, wahaMessageId, body, buttons: template.buttonLabels },
+          payload: { attempted, body, buttons: template.buttonLabels },
           status: "sent",
           createdById: "SYSTEM",
         },
@@ -272,7 +267,7 @@ export class PatientsService {
         data: {
           patientId,
           kind: "opt_in",
-          payload: { chatId, body, buttons: template.buttonLabels },
+          payload: { attempted, body, buttons: template.buttonLabels },
           status: "failed",
           error: "Gagal mengirim pesan opt-in",
           createdById: "SYSTEM",
@@ -292,34 +287,29 @@ export class PatientsService {
     const body = renderTemplate(template.body, { name });
     const text = `${template.title}\n\n${body}`;
 
-    let chatId = `${waNumber}@c.us`;
-    let sent = false;
+    const targets = [`${waNumber}@c.us`];
+    if (lid) targets.push(`${lid}@lid`);
+
+    let sentAny = false;
     let lastError: any;
 
-    try {
-      await this.waha.sendText(chatId, text);
-      sent = true;
-    } catch (error: any) {
-      lastError = error;
-      if (lid) {
-        const lidChatId = `${lid}@lid`;
-        this.logger.warn(
-          `@c.us already-opted-in failed for ${name} (${waNumber}): ${error.message}; falling back to ${lidChatId}`,
+    for (const chatId of targets) {
+      try {
+        await this.waha.sendText(chatId, text);
+        this.logger.log(
+          `Already-opted-in sent to ${name} (${waNumber}) via ${chatId}`,
         );
-        try {
-          await this.waha.sendText(lidChatId, text);
-          chatId = lidChatId;
-          sent = true;
-        } catch (err: any) {
-          lastError = err;
-        }
+        sentAny = true;
+      } catch (error: any) {
+        lastError = error;
+        this.logger.warn(
+          `Already-opted-in send failed for ${name} (${waNumber}) via ${chatId}: ${error.message}`,
+        );
       }
     }
 
-    if (sent) {
-      this.logger.log(
-        `Already-opted-in sent to ${name} (${waNumber}) via ${chatId}`,
-      );
+    if (sentAny) {
+      this.logger.log(`Already-opted-in delivered for ${name} (${waNumber})`);
     } else {
       this.logger.error(
         `Already-opted-in send failed for ${name} (${waNumber}): ${lastError?.message}`,

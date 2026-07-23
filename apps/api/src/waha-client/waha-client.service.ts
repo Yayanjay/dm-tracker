@@ -66,7 +66,11 @@ export class WahaClientService {
         chatId,
         text,
       });
-      return data?.id ?? "unknown";
+      const id = data?.id;
+      if (id && typeof id === "object" && "id" in id) {
+        return String((id as Record<string, unknown>).id);
+      }
+      return (id as string) ?? "unknown";
     } catch (error: any) {
       throw new InternalServerErrorException(
         `Gagal mengirim pesan teks: ${error.response?.data?.message || error.message}`,
